@@ -1,5 +1,5 @@
-#ifndef MATRIX.H
-#define MATRIX.H
+#ifndef MATRIX_H
+#define MATRIX_H
 
 #include <iostream>
 #include <string>
@@ -7,40 +7,51 @@
 
 template <typename T>
 class matrix {
-    private:
+    protected:
         int rowNum;
         int colNum;
+        std::vector<std::vector<T>> data;
 
     public:
-        Matrix(int r, int c) : rowNum(r), colNum(c) {}
+        matrix(int r, int c) : rowNum(r), colNum(c) {}
+        matrix(int r, int c, std::string type);
+        matrix(const std::vector<std::vector<T>>&& inputVector);    //Constructor from a 2D vector
+        matrix(const matrix<T>& inputMatrix);                       //Copy Constructor                              
 
-        virtual void put(int r, int c, T value) = 0;                //insert value into [r,c]
-        T get(int r, int c) = 0;                         //get value at [r,c]
-        virtual void display() = 0;                                 //display the matrix
-        virtual void toString(int loc, string directon) = 0;        //get row/column as a string
+        void put(int r, int c, T value);                            //insert value into [r,c]---NOTICE: r and c starts at 0, NOT 1!!!!!!!!!
+        T get(int r, int c);                                        //get value at [r,c]--------NOTICE: r and c starts at 0, NOT 1!!!!!!!!!
+        int getRow();                                               //get row number 
+        int getCol();                                               //get column number
+        void display() const ;                                      //display the matrix
+        std::string toString(int loc, std::string dir) const ;      //get row/column as a string
+    
+        matrix<T> operator+(const matrix<T>& other) const;          //addition
+        matrix<T> operator-(const matrix<T>& other) const;          //subtraction
+        matrix<T> operator*(const matrix<T>& other) const;          //matrix multiplication
+        matrix<T> operator*(T scalar) const;                        //scalar multiplication
+        matrix<T>& operator+=(const matrix<T>& other);              //addition assignment
+        matrix<T>& operator-=(const matrix<T>& other);              //subtraction assignment
+        matrix<T>& operator*=(T scalar);                            //multiplication assignment
+        matrix<T> operator-() const;                                //convert to negative
 
-        virtual void add(const matrix& inputMatrix) = 0;            //add two matrix
-        virtual void subtract(const matrix& inputMatrix) = 0;       //substract two matrix
-        virtual void multiply(const matrix& inputMatrix) = 0;       //multiply two matrix
-        virtual void divide(const matrix& inputMatrix) = 0;         //divide two matrix
+        void rowOp(int r1, int c1, int r2, int c2) ;                //row operation: R1 = c1*R1 + c2*R2
+        matrix<T> echelonf() ;                                      //get echelon form
+        matrix<T> rref() ;                                          //get reduceed echelon form
+        matrix<T> echelonf(int termination) ;                       //get echelon form from most left to column according to termination
+        matrix<T> rref(int termination) ;                           //get reduceed echelon form from most left to column according to termination
+        T determinant() const ;                                     //get determinant
+        matrix<T> transpose() const ;                               //get transpose of matrix
+        matrix<T> inverse() const ;                                 //get matrix inverse
+        std::vector<T> eigenval() const ;                           //get eigen values
+        std::vector<T> eigenvec() const ;                           //get eigen vectors
+        bool inSpan(std::vector<T> b) const ;                       //determine if a vector b is within the span(in column space/ being the linear combination) of matrix
+        std::vector<std::vector<T>> solve(std::vector<T> b) const ; //determine type of solution(unique, infinite, none) & solve the matrix with the input vector b
+        int norm(std::string normType) const ;                      //Get the norm(1-norm, infinity norm, euclidean norm) of a matrix
 
-        virtual void rowOp(int r1, int c1, int r2, int c2) = 0;     //row operation: R1 = c1*R1 + c2*R2
-        virtual matrix<T> echelonf() = 0;                           //get echelon form
-        virtual matrix<T> rref() = 0;                               //get reduceed echelon form
-        virtual int determinant() = 0;                              //get determinant
-        virtual matrix<T> transpose() = 0;                          //get transpose of matrix
-        virtual matrix<T> inverse() = 0;                            //get matrix inverse
-        virtual int eigenval() = 0;                                 //get eigen values
-        virtual std::vector<T> eigenvec() = 0;                      //get eigen vectors
-        virtual bool inSpan(std::vector<T> b) = 0;                  //determine if a vector b is within the span(in column space/ being the linear combination) of matrix
-        virtual std::vector<T> solve(std::vector<T> b) = 0;         //determine type of solution(unique, infinite, none) & solve the matrix with the input vector b
-        virtual std::vector<matrix> diagonize() = 0;                //diagnoize the matrix
-        virtual std::vector<matrix> LUfactor() = 0;                 //Perform LU factorization
-        virtual int norm(string normType) = 0;                      //Get the norm(1-norm, infinity norm, euclidean norm) of a matrix
-
-        int rank();                                                 //get rank of matrix
-        int nullity();                                              //get nullity of matrix
-        int dimension();                                            //get dimension of matrix
+        int rank() const;                                                 //get rank of matrix
+        int nullity() const;                                              //get nullity of matrix
 };
+
+#include "matrix.tpp"
 
 #endif
