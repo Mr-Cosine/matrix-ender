@@ -1,7 +1,15 @@
+/*
+TODO list:
+    1. Compile and debug
+    2. After finishing dynamic typing, update logics here
+    3. Check for invalid access to data member.
+*/
+
 #include "augMatrix.h"
 #include <iostream>
 #include <vector>
 #include <string>
+#include <iomanip>
 #include <sstream>
 
 template <typename T>
