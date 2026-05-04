@@ -7,7 +7,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "Useful.hpp"
+#include "util.hpp"
 #include "Matrix.hpp"
 #include "Rational.hpp"
 

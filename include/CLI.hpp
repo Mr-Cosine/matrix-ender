@@ -7,7 +7,6 @@
 
 #include "Matrix.hpp"
 #include "Rational.hpp"
-#include "Vector.hpp"
 
 // Variable serialization
 struct Variable {

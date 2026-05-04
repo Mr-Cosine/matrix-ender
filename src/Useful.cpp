@@ -1,7 +1,7 @@
 /*
  * Implementation
 
-#include "Useful.hpp"
+#include "util.hpp"
 #include "Rational.hpp"
 
 template <>

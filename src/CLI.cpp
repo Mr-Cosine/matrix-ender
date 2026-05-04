@@ -1,38 +1,6 @@
 #include <iostream>
 #include "CLI.hpp"
-
-// << overload
-std::ostream& operator<<(std::ostream& os, const std::monostate& _) {
-    return os << "<void>";
-}
-
-std::ostream& operator<<(std::ostream& os, const Variable::VarType& type) {
-    switch (type) {
-        case Variable::VarType::MATRIX:
-            return os << "[Matrix]";
-        case Variable::VarType::VECTOR:
-            return os << "[Vector]";
-        case Variable::VarType::PRIMITIVE:
-            return os << "[Primitive]";
-        default:
-            return os << "[VOID]";
-    }
-}
-
-std::ostream& operator<<(std::ostream& os, const Variable::ExactType& type) {
-    switch (type) {
-        case Variable::ExactType::NUMBER:
-            return os << "<number>";
-        case Variable::ExactType::DECIMAL:
-            return os << "<decimal>";
-        case Variable::ExactType::RATIONAL:
-            return os << "<rational>";
-        case Variable::ExactType::STRING:
-            return os << "<string>";
-        case Variable::ExactType::VOID:
-            return os << "<void>";
-    }
-}
+#include "os-ext.hpp"
 
 #ifdef DEBUG_CLI
 using std::cout, std::cin, std::endl;
@@ -43,9 +11,11 @@ int main() {
 
     add_var("myvar", "[1,2,3;4,5,6]");
     add_var("other", "[1/2, 3/4; 5/6, 7/8]");
+    add_var("dec", "[3.14, 5.32; 4.64, 0.24]");
 
     print_var("myvar");
     print_var("other");
+    print_var("dec");
 
     return 0;
 }
@@ -112,12 +82,10 @@ Variable::Variable(std::string var) {
                     break;
                 case ExactType::DECIMAL:
                     break;
-
                 case ExactType::RATIONAL:
                     break;
                 */
 
-                // No string vectors...
                 default:
                     this->self = std::monostate{};
                     return;
