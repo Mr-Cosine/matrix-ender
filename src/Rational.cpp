@@ -72,17 +72,21 @@ std::string Rational::toString(char separator) const {
     return ss.str();
 }
 
+std::ostream& operator<<(std::ostream& os, const Rational& rational) {
+    return (os << rational.toString());
+}
+
 #ifdef DEBUG_RATIONAL
 #include <iostream>
 using namespace std;
 
 template<typename... Args>
 void print(Args... args) {
-    ((cout << args << ""), ...);
+    ((cout << args << " "), ...);
     cout << endl;
 }
 
-int main(/*int argc, char* argv[]*/) {
+int main() {
     print("=== RATIONAL MODULE DEBUG ===");
 
     // Init
@@ -93,11 +97,11 @@ int main(/*int argc, char* argv[]*/) {
     Rational myrat5 = Rational(4) / Rational("12590/1295");
 
     // Output
-    print("myrat1:", myrat.toString());
-    print("myrat2:", myrat2.toString());
-    print("myrat3:", myrat3.toString());
-    print("myrat4:", myrat4.toString());
-    print("myrat5:", myrat5.toString());
+    print("myrat1:", myrat);
+    print("myrat2:", myrat2);
+    print("myrat3:", myrat3);
+    print("myrat4:", myrat4);
+    print("myrat5:", myrat5);
 
     return 0;
 }
