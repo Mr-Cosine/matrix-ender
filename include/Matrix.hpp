@@ -22,7 +22,7 @@ enum class FillType {
 };
 
 template <Arithmetic T>
-class Matrix {
+class matrix {
 private:
     long row;
     long col;
