@@ -9,9 +9,9 @@
 #include <sstream>
 #include <type_traits>
 
-#include "Useful.hpp"
-#include "Matrix.hpp"
-#include "Rational.hpp"
+#include "util.hpp"
+#include "matrix.hpp"
+#include "rational.hpp"
 
 template <typename T>
 concept Arithmetic = requires(T a, T b) {
