@@ -5,7 +5,7 @@ TODO list:
     3. Check for invalid access to data member.
 */
 
-#include "augMatrix.h"
+#include "augMatrix.hpp"
 #include <iostream>
 #include <vector>
 #include <string>

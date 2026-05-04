@@ -1,7 +1,7 @@
 #ifndef AUGMATRIX_H
 #define AUGMATRIX_H
 
-#include "matrix.h"
+#include "matrix.hpp"
 #include <iostream>
 #include <string>
 #include <vector>

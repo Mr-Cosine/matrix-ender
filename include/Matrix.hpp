@@ -4,6 +4,7 @@
 #include <concepts>
 #include <string>
 #include <vector>
+#include "rational.hpp"
 
 template <typename T>
 concept Arithmetic = requires(T a, T b) {
@@ -26,7 +27,7 @@ class matrix {
 private:
     long row;
     long col;
-    std::vector<std::vector<T>> matrix;
+    std::vector<std::vector<T>> data;
     using Vector = std::vector<T>;
 
     // Matrix Solution Result Type
@@ -80,14 +81,14 @@ private:
 
 public:
     // Filler constructor
-    Matrix(long, long, T, FillType = FillType::EVERY);
+    matrix(long, long, T, FillType = FillType::EVERY);
 
     // String constructor
-    Matrix(std::string, char = ';', char = ',');
+    matrix(std::string, char = ';', char = ',');
 
 
     // Insert value at [r,c] (in-place)
-    Matrix<T> put(long, long, T);
+    void put(long, long, T);
     
     // Retrieve value from [r,c]
     T get(long, long) const;
@@ -100,46 +101,53 @@ public:
 
     // Matrix arithmetics (symbolic)
 
-    Matrix<T> operator+(const Matrix<T>&) const;
-    Matrix<T> operator-(const Matrix<T>&) const;
-    Matrix<T> operator*(const Matrix<T>&) const;
-    Matrix<T> operator/(const Matrix<T>&) const;
+    matrix<T> operator+(const matrix<T>&) const;
+    matrix<T> operator-(const matrix<T>&) const;
+    matrix<T> operator*(const matrix<T>&) const;
+    matrix<T> operator*(const T) const;
+    matrix<T> operator/(const matrix<T>&) const;
+
+    matrix<T>& matrix<T>::operator+=(const matrix<T>& other);
+    matrix<T>& matrix<T>::operator-=(const matrix<T>& other);
+    matrix<T>& matrix<T>::operator*=(T scalar);
 
     // Matrix arithmetics (method invoc.)
 
-    Matrix<T> add(const Matrix<T>&) const;
-    Matrix<T> sub(const Matrix<T>&) const;
-    Matrix<T> mult(const Matrix<T>&) const;
-    Matrix<T> div(const Matrix<T>&) const;
+    matrix<T> add(const matrix<T>&) const;
+    matrix<T> sub(const matrix<T>&) const;
+    matrix<T> mult(const matrix<T>&) const;
+    matrix<T> div(const matrix<T>&) const;
 
     // Matrix operations
 
     // Row operation (in-place)
-    void ro(int, int, int, int);
+    void ro(long, long, long, long);
 
     // Column operation (in-place)
-    void co(int, int, int, int);
+    void co(long, long, long, long);
 
     // Row exchange (in-place)
-    void re(int, int);
+    void re(long, long);
 
     // Column exchange (in-place)
-    void ce(int, int);
+    void ce(long, long);
 
     // get row echelon form
-    Matrix<T> ref() const;
+    matrix<T> ref() const;
+    matrix<T> ref(long) const;
 
     // get reduced row echelon form
-    Matrix<T> rref() const;
+    matrix<T> rref() const;
+    matrix<T> rref(long) const;
 
     // Get determinant
     T det() const;
 
     // Get transpose
-    Matrix<T> transpose() const;
+    matrix<T> transpose() const;
 
     // Get inverse (throws NotInvertibleMatrixException if not invertible)
-    Matrix<T> inverse() const;
+    matrix<T> inverse() const;
 
     // Get eigenvalues
     Vector eigenval() const;
