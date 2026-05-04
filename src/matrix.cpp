@@ -30,7 +30,7 @@ void print(Args... args) {
 #endif
 
 template <Arithmetic T>
-matrix<T>::Matrix(long row, long column, T filler, FillType fill_type)
+matrix<T>::matrix(long row, long column, T filler, FillType fill_type)
     : row(row), col(column), matrix(row, std::vector<T>(column, T(0))) {
         switch (fill_type) {
             case FillType::EVERY:
