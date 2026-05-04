@@ -15,7 +15,9 @@ concept Arithmetic = requires(T a, T b) {
 
 enum class FillType {
     UPPER_TRI,
+    UPPER_TRI_R,
     LOWER_TRI,
+    LOWER_TRI_R,
     EVERY
 };
 
@@ -65,6 +67,17 @@ private:
         }
     };
 
+    class IndexOutOfBoundException: public std::exception {
+    private:
+        std::string message;
+    public:
+        explicit IndexOutOfBoundException(std::string message) : message(message) {}
+
+        const char* what() const noexcept override {
+            return this->message.c_str();
+        }
+    };
+
 public:
     // Filler constructor
     Matrix(long, long, T, FillType = FillType::EVERY);
@@ -72,9 +85,6 @@ public:
     // String constructor
     Matrix(std::string, char = ';', char = ',');
 
-    // Move and destructor: use default
-    Matrix(Matrix<T>&&) = default;
-    ~Matrix() = default;
 
     // Insert value at [r,c] (in-place)
     Matrix<T> put(long, long, T);
@@ -83,10 +93,10 @@ public:
     T get(long, long) const;
 
     // Stringnify the matrix
-    std::string toString(long = -1, long = -1, char = ';', char = ',') const;
+    std::string toString(long = -1, long = -1, char = '\n', char = ',', bool = true) const;
     
     // Print the matrix
-    void print(char = '\n', char = ',') const;
+    void print(char = '\n', char = ',', bool = true, bool = true) const;
 
     // Matrix arithmetics (symbolic)
 
@@ -117,51 +127,51 @@ public:
     void ce(int, int);
 
     // get row echelon form
-    Matrix<T> ref();
+    Matrix<T> ref() const;
 
     // get reduced row echelon form
-    Matrix<T> rref();
+    Matrix<T> rref() const;
 
     // Get determinant
-    T det();
+    T det() const;
 
     // Get transpose
-    Matrix<T> transpose();
+    Matrix<T> transpose() const;
 
     // Get inverse (throws NotInvertibleMatrixException if not invertible)
-    Matrix<T> inverse();
+    Matrix<T> inverse() const;
 
     // Get eigenvalues
-    Vector eigenval();
+    Vector eigenval() const;
 
     // Get eigenvectors
-    std::vector<Vector> eigenvec();
+    std::vector<Vector> eigenvec() const;
 
     // Check if a vector is in the matrix's spanning space
     // FROM [//determine if a vector b is within the span(in column space/ being the linear combination) of matrix]
-    bool inspan(Vector);
+    bool inspan(Vector) const;
 
     // Determine type of solution(unique, infinite, nil) & solve the matrix with the input vector b
     // Reading from Solution.vector when Solution.type = infinite / nil is undefined behavior
-    Solution solve(Vector);
+    Solution solve(Vector) const;
     
     // Diagnoize the matrix
-    Matrix<T> diagonize();
+    Matrix<T> diagonize() const;
 
     // LU Factorization
-    Matrix<T> LU();
+    Matrix<T> LU() const;
 
     // Get the norm(1-norm, infinity norm, euclidean norm) of a matrix
-    long norm(std::string);
+    long norm(std::string) const;
 
     // Matrix properties
 
     // Get rank of matrix
-    long rank();
+    long rank() const;
 
     // Get nullity of matrix                                              
-    long null();
+    long null() const;
 
     // Get dimension of matrix
-    long dim();
+    long dim() const;
 };

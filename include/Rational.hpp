@@ -4,6 +4,7 @@
 
 #pragma once
 #include <sstream>
+#include <ostream>
 
 class Rational {
     long num, denom;
@@ -21,7 +22,7 @@ public:
     Rational(long, long);
 
     /**
-     * Instantiates a fraction based on a string descriptor and delimiter
+     * Instantiates a fraction based on a string descriptor and a delimiter
      *
      * @param descriptor String description of the fraction
      * @param delimiter Delimiter of the fraction (defaults to '/')
@@ -39,10 +40,6 @@ public:
      * @return A Rational type
      */
     Rational(long);
-
-    // Use default
-    Rational(Rational&&) = default;
-    ~Rational() = default;
 
     /**
      * Adds two Rational number
@@ -103,3 +100,5 @@ public:
      */
     std::string toString(char = '/') const;
 };
+
+std::ostream& operator<<(std::ostream&, const Rational&);

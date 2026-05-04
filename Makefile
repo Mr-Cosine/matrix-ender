@@ -45,7 +45,8 @@ MD	:= mkdir -p
 endif
 
 # custom test_branch parameters
-TEST_PATH   := src/local_test/tc.cpp
+TEST_PATH  := src/local_test_suite/
+TEST_CASE_COUNT = 100
 
 # define any directories containing header files other than /usr/include
 INCLUDES	:= $(patsubst %,-I%, $(INCLUDEDIRS:%/=%))
@@ -92,13 +93,22 @@ $(MAIN): $(OBJECTS)
 
 .PHONY: clean
 
-test_rat:
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -DDEBUG_RATIONAL src/Rational.cpp -o rat && ./rat
-test_mat:
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -DDEBUG_MATRIX src/Matrix.cpp -o matrix && ./matrix
+trat:
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -DDEBUG_RATIONAL src/Rational.cpp -o tmp-exec/rational && tmp-exec/rational
+tmat:
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -DDEBUG_MATRIX src/Matrix.cpp src/Rational.cpp src/Useful.cpp -o tmp-exec/matrix && tmp-exec/matrix
+
+tcrat:
+	@echo
+	python3 $(TEST_PATH)rationals.py $(TEST_CASE_COUNT)
+	@echo
+tcmat:
+	@echo
+	python3 $(TEST_PATH)matrices.py $(TEST_CASE_COUNT)
+	@echo
 
 clean_test:
-	rm -f ./rat ./matrix
+	rm -rf tmp-exec/*
 
 clean:
 	$(RM) $(OUTPUTMAIN)
