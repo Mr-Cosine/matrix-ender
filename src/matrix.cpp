@@ -37,6 +37,9 @@ void print(Args... args) {
     ((cout << args << " "), ...);
     cout << endl;
 }
+inline std::ostream& operator<<(std::ostream& os, const Rational& rational) {
+    return os << rational.toString();
+}
 #endif
 
 template <Arithmetic T>
@@ -121,6 +124,10 @@ Matrix<T>::Matrix(std::string descriptor, char row_delimiter, char column_delimi
 */
 
 #ifdef DEBUG_MATRIX
+template <typename T>
+inline std::ostream& operator<<(std::ostream& os, const matrix<T>& mat) {
+    return os << mat.toString();
+}
 int main() {
     
     print("=== MATRIX MODULE DEBUG ===\n");

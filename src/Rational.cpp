@@ -70,6 +70,10 @@ Rational Rational::neg() const {
 #include <iostream>
 using namespace std;
 
+inline std::ostream& operator<<(std::ostream& os, const Rational& rational) {
+    return os << rational.toString();
+}
+
 template<typename... Args>
 void print(Args... args) {
     ((cout << args << " "), ...);
