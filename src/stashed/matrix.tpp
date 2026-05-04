@@ -1,7 +1,8 @@
-#ifndef MATRIX_TPP
+/*#ifndef MATRIX_TPP
 #define MATRIX_TPP
 
-#include "augMatrix.h"
+
+#include "augMatrix.hpp"
 
 template <Arithmetic T>
 std::vector<std::vector<T>> matrix<T>::solve(std::vector<T> b) const {
@@ -30,3 +31,4 @@ bool matrix<T>::inSpan(std::vector<T> b) const {
 }
 
 #endif
+*/
