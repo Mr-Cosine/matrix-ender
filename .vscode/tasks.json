@@ -12,7 +12,8 @@
                 "command": "powershell",
                 "args": [
                     "-c",
-                    "mingw32-make"
+                    "mingw32-make",
+                    "-std=c++20"
                 ]
             },
             "linux": {

@@ -10,6 +10,6 @@ void p(string content, bool new_line = true) {
 }
 
 int main() {
-    cout << "To be implemente..." << endl;
+    cout << "To be implemented..." << endl;
     return 0;
 }
