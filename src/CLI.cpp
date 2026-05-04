@@ -1,6 +1,39 @@
 #include <iostream>
 #include "CLI.hpp"
 
+// << overload
+std::ostream& operator<<(std::ostream& os, const std::monostate& _) {
+    return os << "<void>";
+}
+
+std::ostream& operator<<(std::ostream& os, const Variable::VarType& type) {
+    switch (type) {
+        case Variable::VarType::MATRIX:
+            return os << "[Matrix]";
+        case Variable::VarType::VECTOR:
+            return os << "[Vector]";
+        case Variable::VarType::PRIMITIVE:
+            return os << "[Primitive]";
+        default:
+            return os << "[VOID]";
+    }
+}
+
+std::ostream& operator<<(std::ostream& os, const Variable::ExactType& type) {
+    switch (type) {
+        case Variable::ExactType::NUMBER:
+            return os << "<number>";
+        case Variable::ExactType::DECIMAL:
+            return os << "<decimal>";
+        case Variable::ExactType::RATIONAL:
+            return os << "<rational>";
+        case Variable::ExactType::STRING:
+            return os << "<string>";
+        case Variable::ExactType::VOID:
+            return os << "<void>";
+    }
+}
+
 #ifdef DEBUG_CLI
 using std::cout, std::cin, std::endl;
 
@@ -9,7 +42,10 @@ int main() {
     cout << "MET(v0.0) by A1batr0z & Mr-Cosine | Enter `help` to get help list.\n" << endl;
 
     add_var("myvar", "[1,2,3;4,5,6]");
+    add_var("other", "[1/2, 3/4; 5/6, 7/8]");
+
     print_var("myvar");
+    print_var("other");
 
     return 0;
 }
@@ -23,8 +59,9 @@ Variable::Variable(std::string var) {
 
     switch (this->type) {
         case VarType::MATRIX: {
+            size_t start = var.find_first_of('[');
             size_t fcom = var.find_first_of(','), fsemc = var.find_first_of(';');
-            tkn = var.substr(var.find_first_of('['), fcom < fsemc ? fcom : fsemc);
+            tkn = var.substr(var.find_first_of('[') + 1, (fcom < fsemc ? fcom : fsemc) - start - 1);
             break;
         }
 
@@ -33,7 +70,7 @@ Variable::Variable(std::string var) {
             break;
         }
 
-        case VarType::PRIMITIVE: {
+        default: {
             tkn = var;
             break;
         }
@@ -89,7 +126,7 @@ Variable::Variable(std::string var) {
         case VarType::PRIMITIVE:
             switch (this->etype) {
                 case ExactType::NUMBER:
-                    this->self = static_cast<long>(std::stoi(var));
+                    this->self = std::stol(var);
                     break;
 
                 case ExactType::DECIMAL:
@@ -120,9 +157,9 @@ Variable::ExactType Variable::exact_type_of(std::string tkn) {
         return ExactType::RATIONAL;
     } else if (tkn.find('"') == std::string::npos
                 && tkn.find('.') == std::string::npos
-                && tkn.find('/') != std::string::npos) {
-        for (const char& digit: "1234567890") {
-            if (tkn.find_first_not_of(digit) != std::string::npos) {
+                && tkn.find('/') == std::string::npos) {
+        for (const char& c: tkn) {
+            if (c - '0' < 0 || c - '0' > 9) {
                 return ExactType::VOID;
             }
         }
@@ -141,20 +178,8 @@ Variable::VarType Variable::var_type_of(std::string token) {
                     && token.find(',') != std::string::npos
                     && token.find(';') != std::string::npos;
     if (isMatrix) {
-        /*
-        size_t start = token.find_first_of('[');
-        size_t comma = token.find_first_of(',');
-        size_t semicol = token.find_first_of(';');
-        size_t end = comma < semicol ? comma : semicol;
-        std::string entry = token.substr(start, end);
-        */
         return VarType::MATRIX;
     } else if (isVector) {
-        /*
-        size_t start = token.find_first_of('[');
-        size_t end = token.find_first_of(';');
-        std::string entry = token.substr(start, end);
-        */
         return VarType::VECTOR;
     } else {
         return VarType::PRIMITIVE;
@@ -168,39 +193,6 @@ void add_var(std::string identifier, std::string variable_string) {
     __variables__.insert_or_assign(identifier, raw_ptr);
 }
 
-// << overload
-std::ostream& operator<<(std::ostream& os, const std::monostate& _) {
-    return os << "<void>";
-}
-
-std::ostream& operator<<(std::ostream& os, const Variable::VarType& type) {
-    switch (type) {
-        case Variable::VarType::MATRIX:
-            return os << "[Matrix]";
-        case Variable::VarType::VECTOR:
-            return os << "[Vector]";
-        case Variable::VarType::PRIMITIVE:
-            return os << "[Primitive]";
-        default:
-            return os << "[VOID]";
-    }
-}
-
-std::ostream& operator<<(std::ostream& os, const Variable::ExactType& type) {
-    switch (type) {
-        case Variable::ExactType::NUMBER:
-            return os << "<number>";
-        case Variable::ExactType::DECIMAL:
-            return os << "<decimal>";
-        case Variable::ExactType::RATIONAL:
-            return os << "<rational>";
-        case Variable::ExactType::STRING:
-            return os << "<string>";
-        case Variable::ExactType::VOID:
-            return os << "<void>";
-    }
-}
-
 void print_var(std::string identifier) {
     auto it = __variables__.find(identifier);
     if (it != __variables__.end()) {
@@ -208,7 +200,7 @@ void print_var(std::string identifier) {
         auto type = it->second->type;
         auto etype = it->second->etype;
         std::visit([&](auto&& arg) {
-            std::cout << identifier << type << etype << " => " << arg << std::endl;
+            std::cout << identifier << type << etype << " =>\n" << arg << std::endl;
         }, data);
     } else {
         std::cout << identifier << " => " << "[undefined]" << std::endl;
@@ -241,7 +233,7 @@ std::string trim(std::string str) {
     size_t bgn, end;
     for (bgn = 0; !std::isspace(str[bgn]); bgn++);
     for (end = str.size() - 1; !std::isspace(str[end]); end--);
-    return str.substr(bgn, end + 1);
+    return str.substr(bgn, end - bgn);
 }
 
 // Global removal
@@ -264,5 +256,5 @@ size_t count(std::string haystack, char needle) {
 std::string delimitBy(std::string str, char from, char to) {
     size_t start = str.find_first_of(from);
     size_t end = str.find_last_of(to);
-    return str.substr(start, end + 1);
+    return str.substr(start + 1, end - start);
 }

@@ -4,6 +4,7 @@
 #include <concepts>
 #include <string>
 #include <vector>
+#include <iostream>
 #include <sstream>
 
 #include "Useful.hpp"
@@ -83,6 +84,17 @@ private:
         }
     };
 
+    class MalformedMatrixException: public std::exception {
+    private:
+        std::string message;
+    public:
+        explicit MalformedMatrixException(std::string message) : message(message) {}
+
+        const char* what() const noexcept override {
+            return this->message.c_str();
+        }
+    };
+
 public:
     // Default constructor (std::variant compatibility)
     Matrix() : row(0), col(0) {};
@@ -92,6 +104,12 @@ public:
 
     // String constructor
     Matrix(std::string descriptor, char row_delimiter = ';', char column_delimiter = ',')  {
+        if (descriptor.find('[') != std::string::npos && descriptor.find(']') != std::string::npos) {
+            descriptor = descriptor.substr(descriptor.find('[') + 1, descriptor.find(']') - descriptor.find('[') - 1);
+        } else if (descriptor.find('[') != std::string::npos && descriptor.find(']') != std::string::npos) {
+            throw MalformedMatrixException("[ was never closed");
+        }
+
         std::istringstream iss(descriptor);
         std::string row_tkn;
         while (std::getline(iss, row_tkn, row_delimiter) && !row_tkn.empty()) {
@@ -114,7 +132,7 @@ public:
     T get(long, long) const;
 
     // Stringnify the matrix
-    std::string toString(long row = -1, long column = -1, char row_delimiter = ';', char column_delimiter = ',', bool tab = true) const {
+    std::string toString(long row = -1, long column = -1, char row_delimiter = ';', char column_delimiter = ',', bool tab = true, bool line_break = true) const {
         if (row > this->row || column > this->col) {
             throw IndexOutOfBoundException("Index out of bounds");
         }
@@ -132,7 +150,10 @@ public:
                     if (tab) oss << "\t";
                 }
             }
-            if (i != column - 1) oss << row_delimiter;
+            if (i != row - 1) {
+                oss << row_delimiter;
+                if (line_break) oss << "\n";
+            }
         }
         oss << "]" << std::endl;
         return oss.str();
