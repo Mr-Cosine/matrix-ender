@@ -4,6 +4,11 @@
 #include <concepts>
 #include <string>
 #include <vector>
+#include <sstream>
+
+#include "Useful.hpp"
+#include "Matrix.hpp"
+#include "Rational.hpp"
 
 template <typename T>
 concept Arithmetic = requires(T a, T b) {
@@ -79,12 +84,28 @@ private:
     };
 
 public:
+    // Default constructor (std::variant compatibility)
+    Matrix() : row(0), col(0) {};
+
     // Filler constructor
     Matrix(long, long, T, FillType = FillType::EVERY);
 
     // String constructor
-    Matrix(std::string, char = ';', char = ',');
-
+    Matrix(std::string descriptor, char row_delimiter = ';', char column_delimiter = ',')  {
+        std::istringstream iss(descriptor);
+        std::string row_tkn;
+        while (std::getline(iss, row_tkn, row_delimiter) && !row_tkn.empty()) {
+            std::vector<T> row;
+            std::istringstream row_iss(row_tkn);
+            std::string tkn;
+            while (std::getline(row_iss, tkn, column_delimiter) && !tkn.empty()) {
+                row.push_back(from_string<T>(tkn));
+            }
+            this->matrix.push_back(row);
+        }
+        this->row = this->matrix.size();
+        this->col = this->row > 0 ? this->matrix[0].size() : 0;
+    }
 
     // Insert value at [r,c] (in-place)
     Matrix<T> put(long, long, T);
@@ -93,7 +114,29 @@ public:
     T get(long, long) const;
 
     // Stringnify the matrix
-    std::string toString(long = -1, long = -1, char = '\n', char = ',', bool = true) const;
+    std::string toString(long row = -1, long column = -1, char row_delimiter = ';', char column_delimiter = ',', bool tab = true) const {
+        if (row > this->row || column > this->col) {
+            throw IndexOutOfBoundException("Index out of bounds");
+        }
+
+        row = row < 0 ? this->row : row;
+        column = column < 0 ? this->col : col;
+        std::ostringstream oss;
+        oss << "[";
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < this->col; j++) {
+                if (i != 0 && j == 0) oss << " ";
+                oss << this->matrix[i][j];
+                if (j != this->col - 1) {
+                    oss << column_delimiter;
+                    if (tab) oss << "\t";
+                }
+            }
+            if (i != column - 1) oss << row_delimiter;
+        }
+        oss << "]" << std::endl;
+        return oss.str();
+    }
     
     // Print the matrix
     void print(char = '\n', char = ',', bool = true, bool = true) const;
@@ -175,3 +218,9 @@ public:
     // Get dimension of matrix
     long dim() const;
 };
+
+
+template <Arithmetic T>
+std::ostream& operator<<(std::ostream& os, const Matrix<T> matrix) {
+    return os << matrix.toString();
+}

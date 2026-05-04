@@ -98,7 +98,13 @@ public:
      * 
      * @return String descriptor with a delimiter
      */
-    std::string toString(char = '/') const;
+    std::string toString(char separator = '/') const {
+        std::stringstream ss;
+        ss << this->num << separator << this->denom;
+        return ss.str();
+    }
 };
 
-std::ostream& operator<<(std::ostream&, const Rational&);
+inline std::ostream& operator<<(std::ostream& os, const Rational& rational) {
+    return os << rational.toString();
+}

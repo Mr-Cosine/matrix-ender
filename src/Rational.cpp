@@ -66,16 +66,6 @@ Rational Rational::neg() const {
     );
 }
 
-std::string Rational::toString(char separator) const {
-    std::stringstream ss;
-    ss << this->num << separator << this->denom;
-    return ss.str();
-}
-
-std::ostream& operator<<(std::ostream& os, const Rational& rational) {
-    return (os << rational.toString());
-}
-
 #ifdef DEBUG_RATIONAL
 #include <iostream>
 using namespace std;

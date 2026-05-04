@@ -1,9 +1,5 @@
-#include "Matrix.hpp"
-#include "Rational.hpp"
-#include "Useful.hpp"
-
 #include <iostream>
-#include <sstream>
+#include "Matrix.hpp"
 
 #ifdef DEBUG_MATRIX
 using std::cout, std::cin, std::endl;
@@ -77,6 +73,9 @@ void Matrix<T>::print(char row_delimiter, char column_delimiter, bool tab, bool 
     std::cout << (pad ? "]\n" : "]") << std::endl;
 }
 
+/*
+Definition moved to header for compatibility
+
 template <Arithmetic T>
 Matrix<T>::Matrix(std::string descriptor, char row_delimiter, char column_delimiter) {
     std::istringstream iss(descriptor);
@@ -91,39 +90,9 @@ Matrix<T>::Matrix(std::string descriptor, char row_delimiter, char column_delimi
         this->matrix.push_back(row);
     }
     this->row = this->matrix.size();
-    this->col = this->matrix[0].size();
+    this->col = this->row > 0 ? this->matrix[0].size() : 0;
 }
-
-template <Arithmetic T>
-std::string Matrix<T>::toString(long row, long column, char row_delimiter, char column_delimiter, bool tab) const {
-    if (row > this->row || column > this->col) {
-        throw IndexOutOfBoundException("Index out of bounds");
-    }
-
-    row = row < 0 ? this->row : row;
-    column = column < 0 ? this->col : col;
-    std::ostringstream oss;
-    oss << "[";
-    for (int i = 0; i < row; i++) {
-        for (int j = 0; j < this->col; j++) {
-            if (i != 0 && j == 0) oss << " ";
-            oss << this->matrix[i][j];
-            if (j != this->col - 1) {
-                oss << column_delimiter;
-                if (tab) oss << "\t";
-            }
-        }
-        if (i != column - 1) oss << row_delimiter;
-    }
-    oss << "]" << std::endl;
-    return oss.str();
-}
-
-template <Arithmetic T>
-std::ostream& operator<<(std::ostream& os, const Matrix<T> matrix) {
-    return os << matrix.toString();
-}
-
+*/
 
 #ifdef DEBUG_MATRIX
 int main() {

@@ -1,6 +1,6 @@
 /*
  * Implementation
- */
+
 #include "Useful.hpp"
 #include "Rational.hpp"
 
@@ -38,3 +38,4 @@ template <>
 Rational from_string<Rational>(std::string str) {
     return Rational(str);
 }
+*/
