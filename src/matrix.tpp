@@ -3,7 +3,7 @@
 
 #include "augMatrix.h"
 
-template <typename T>
+template <Arithmetic T>
 std::vector<std::vector<T>> matrix<T>::solve(std::vector<T> b) const {
     matrix<T> matrixb(rowNum, 1);
     for (int i = 0; i < rowNum; ++i)
@@ -14,7 +14,7 @@ std::vector<std::vector<T>> matrix<T>::solve(std::vector<T> b) const {
     return sol;
 }
 
-template <typename T>
+template <Arithmetic T>
 bool matrix<T>::inSpan(std::vector<T> b) const {
     matrix<T> matrixb(rowNum, 1);
     for (int i = 0; i < rowNum; ++i)

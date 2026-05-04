@@ -19,7 +19,115 @@ TODO list:
 template <typename T>
 class augMatrix;
 
-template <typename T>
+#ifdef DEBUG_MATRIX
+using std::cout, std::cin, std::endl;
+// Print helper
+template <typename... Args>
+void print(Args... args) {
+    ((cout << args << " "), ...);
+    cout << endl;
+}
+#endif
+
+template <Arithmetic T>
+matrix<T>::Matrix(long row, long column, T filler, FillType fill_type)
+    : row(row), col(column), matrix(row, std::vector<T>(column, T(0))) {
+        switch (fill_type) {
+            case FillType::EVERY:
+                this->matrix = std::vector<std::vector<T>>(row, std::vector<T>(column, filler));
+                break;
+
+            case FillType::UPPER_TRI:
+                for (int i = 0; i < column; i++) {
+                    for (int j = 0; j <= i; j++) {
+                        this->matrix[j][i] = filler;
+                    }
+                }
+                break;
+            
+            case FillType::UPPER_TRI_R:
+                for (int i = 0; i < column; i++) {
+                    for (int j = 0; j < row - i; j++) {
+                        this->matrix[j][i] = filler;
+                    }
+                }
+                break;
+
+            case FillType::LOWER_TRI:
+                for (int i = 0; i < column; i++) {
+                    for (int j = 0; j < row - i; j++) {
+                        this->matrix[row - 1 - j][i] = filler;
+                    }
+                }
+                break;
+            
+            case FillType::LOWER_TRI_R:
+                for (int i = 0; i < column; i++) {
+                    for (int j = 0; j <= i; j++) {
+                        this->matrix[row - 1 - j][i] = filler;
+                    }
+                }
+                break;
+
+            default:
+                throw InvalidFillTypeException("fill_type does not conform to any FillType enum");
+        }
+}
+
+template <Arithmetic T>
+void matrix<T>::print(char row_delimiter, char column_delimiter, bool tab, bool pad) const {
+    std::cout << (pad ? "\n[" : "[");
+    for (int i = 0; i < this->row; i++) {
+        for (int j = 0; j < this->col; j++) {
+            if ( i != 0 && j == 0) std::cout << " ";
+            std::cout << this->matrix[i][j];
+            if (j != this->col - 1) std::cout << column_delimiter;
+            if (tab && !(i == this->row - 1 && j == this->col - 1)) std::cout << "\t";
+        }
+        if (i != this->row - 1) std::cout << row_delimiter;
+    }
+    std::cout << (pad ? "]\n" : "]") << std::endl;
+}
+
+/*
+Definition moved to header for compatibility
+
+template <Arithmetic T>
+Matrix<T>::Matrix(std::string descriptor, char row_delimiter, char column_delimiter) {
+    std::istringstream iss(descriptor);
+    std::string row_tkn;
+    while (std::getline(iss, row_tkn, row_delimiter) && !row_tkn.empty()) {
+        std::vector<T> row;
+        std::istringstream row_iss(row_tkn);
+        std::string tkn;
+        while (std::getline(row_iss, tkn, column_delimiter) && !tkn.empty()) {
+            row.push_back(from_string<T>(tkn));
+        }
+        this->matrix.push_back(row);
+    }
+    this->row = this->matrix.size();
+    this->col = this->row > 0 ? this->matrix[0].size() : 0;
+}
+*/
+
+#ifdef DEBUG_MATRIX
+int main() {
+    
+    print("=== MATRIX MODULE DEBUG ===\n");
+
+    Matrix<int> mymat(4, 4, 1, FillType::UPPER_TRI_R);
+    mymat.print();
+    Matrix<Rational> myratmat(4, 4, 2, FillType::LOWER_TRI);
+    myratmat.print();
+    Matrix<int> strmat("1,2,3;4,5,6;7,8,9,;");
+    strmat.print();
+    cout << "printing matrix:\n" << strmat << endl;
+
+    return 0;
+}
+#endif
+
+template <Arithmetic T>
 matrix<T>::matrix(int r, int c, std::string type) :
     rowNum(r), 
     colNum(c),
@@ -60,7 +168,7 @@ matrix<T>::matrix(int r, int c, std::string type) :
     else throw std::invalid_argument("Unknown matrix type, got: " + type);
 }
 
-template <typename T>
+template <Arithmetic T>
 matrix<T>::matrix(const matrix<T>& inputMatrix) : 
     rowNum(inputMatrix.getRow()), 
     colNum(inputMatrix.getCol()),
@@ -73,7 +181,7 @@ matrix<T>::matrix(const matrix<T>& inputMatrix) :
     }
 }
 
-template <typename T>
+template <Arithmetic T>
 matrix<T>::matrix(const std::vector<std::vector<T>> inputVector) : 
     rowNum(static_cast<int>(inputVector.size())),
     colNum(rowNum > 0 ? static_cast<int>(inputVector[0].size()) : 0),
@@ -88,7 +196,7 @@ matrix<T>::matrix(const std::vector<std::vector<T>> inputVector) :
     }
 }
 
-template <typename T>
+template <Arithmetic T>
 void matrix<T>::put(int r, int c, T value) {
     if (r >= rowNum) throw std::out_of_range("Row index " + std::to_string(r) + " out of bounds");
     if (c >= colNum) throw std::out_of_range("Column index " + std::to_string(c) + " out of bounds");
@@ -97,15 +205,15 @@ void matrix<T>::put(int r, int c, T value) {
     return;
 }
 
-template <typename T>
-T matrix<T>::get(int r, int c = 0) const {
+template <Arithmetic T>
+T matrix<T>::get(int r, int c) const {
     if (r >= rowNum) throw std::out_of_range("Row index " + std::to_string(r) + " out of bounds");
     if (c >= colNum) throw std::out_of_range("Column index " + std::to_string(c) + " out of bounds");
     
     return data[r][c];
 }
 
-template <typename T>
+template <Arithmetic T>
 void matrix<T>::display() const {
     if (data.empty() || data[0].empty()) { throw std::runtime_error("Matrix is empty"); }
 
@@ -120,7 +228,7 @@ void matrix<T>::display() const {
     return;
 };
 
-template<typename T>
+template <Arithmetic T>
 std::string matrix<T>::toString(int loc, std::string dir) const {
     if (data.empty() || data[0].empty()) { throw std::runtime_error("Matrix is empty"); }
 
@@ -151,7 +259,7 @@ std::string matrix<T>::toString(int loc, std::string dir) const {
     else throw std::invalid_argument("Direction must be 'row' or 'column', got: " + dir);
 }
 
-template <typename T>
+template <Arithmetic T>
 matrix<T> matrix<T>::operator+(const matrix<T>& other) const {
     if (rowNum != other.getRow() || colNum != other.getCol()) {
         throw std::invalid_argument("Unmatched matrix size");
@@ -166,7 +274,7 @@ matrix<T> matrix<T>::operator+(const matrix<T>& other) const {
     return result;
 }
 
-template <typename T>
+template <Arithmetic T>
 matrix<T> matrix<T>::operator-(const matrix<T>& other) const {
     if (rowNum != other.getRow() || colNum != other.getCol()) {
         throw std::invalid_argument("Unmatched matrix size");
@@ -181,7 +289,7 @@ matrix<T> matrix<T>::operator-(const matrix<T>& other) const {
     return result;
 }
 
-template <typename T>
+template <Arithmetic T>
 matrix<T> matrix<T>::operator*(const matrix<T>& other) const {
     if (colNum != other.getRow()) {
         throw std::invalid_argument("Matrix multiplication: columns must match rows");
@@ -200,7 +308,7 @@ matrix<T> matrix<T>::operator*(const matrix<T>& other) const {
     return result;
 }
 
-template <typename T>
+template <Arithmetic T>
 matrix<T> matrix<T>::operator*(const T scalar) const {
     matrix<T> result(rowNum, colNum);
     for (int i = 0; i < rowNum; i++) {
@@ -211,12 +319,12 @@ matrix<T> matrix<T>::operator*(const T scalar) const {
     return result;
 }
 
-template <typename U>
+template <Arithmetic U>
 matrix<U> operator*(U scalar, const matrix<U>& m) {
     return m * scalar;
 }
 
-template <typename T>
+template <Arithmetic T>
 matrix<T>& matrix<T>::operator+=(const matrix<T>& other) {
     if (rowNum != other.getRow() || colNum != other.getCol()) {
         throw std::invalid_argument("Unmatched matrix size");
@@ -230,7 +338,7 @@ matrix<T>& matrix<T>::operator+=(const matrix<T>& other) {
     return *this;
 }
 
-template <typename T>
+template <Arithmetic T>
 matrix<T>& matrix<T>::operator-=(const matrix<T>& other) {
     if (rowNum != other.getRow() || colNum != other.getCol()) {
         throw std::invalid_argument("Unmatched matrix size");
@@ -244,7 +352,7 @@ matrix<T>& matrix<T>::operator-=(const matrix<T>& other) {
     return *this;
 }
 
-template <typename T>
+template <Arithmetic T>
 matrix<T>& matrix<T>::operator*=(T scalar) {
     for (int i = 0; i < rowNum; i++) {
         for (int j = 0; j < colNum; j++) {
@@ -254,7 +362,7 @@ matrix<T>& matrix<T>::operator*=(T scalar) {
     return *this;
 }
 
-template <typename T>
+template <Arithmetic T>
 void matrix<T>::rowOp(int r1, int c1, int r2, int c2) {
     if (r1 >= rowNum || r2 >= rowNum || c1 == 0) throw std::invalid_argument("Invalid argument for r1, r2, and c1");
 
@@ -265,14 +373,14 @@ void matrix<T>::rowOp(int r1, int c1, int r2, int c2) {
     return;
 }
 
-template <typename T>
+template <Arithmetic T>
 void matrix<T>::rowSwap(int r1, int r2) {
     if (r1 >= rowNum || r2 >= rowNum) throw std::invalid_argument("r1 and/or r2 out of bound");
 
     std::swap(data[r1], data[r2]);
 }
 
-template <typename T>
+template <Arithmetic T>
 matrix<T> matrix<T>::echelonf(int termination) const {
     if (data.empty() || data[0].empty()) throw std::runtime_error("Matrix is empty");
 
@@ -307,10 +415,10 @@ matrix<T> matrix<T>::echelonf(int termination) const {
     return temp;
 }
 
-template <typename T>
+template <Arithmetic T>
 matrix<T> matrix<T>::echelonf() const { return echelonf(colNum); }
 
-template <typename T>
+template <Arithmetic T>
 matrix<T> matrix<T>::rref(int termination) const {
     if (data.empty() || data[0].empty())
         throw std::runtime_error("Matrix is empty");
@@ -343,10 +451,10 @@ matrix<T> matrix<T>::rref(int termination) const {
     return temp;
 }
 
-template <typename T>
+template <Arithmetic T>
 matrix<T> matrix<T>::rref() const { return rref(colNum); }
 
-template <typename T>
+template <Arithmetic T>
 T matrix<T>::determinant() const {
     if (rowNum != colNum) throw std::invalid_argument("Non-square matrix");
 
@@ -371,7 +479,7 @@ T matrix<T>::determinant() const {
     return det;
 }
 
-template <typename T>
+template <Arithmetic T>
 matrix<T> matrix<T>::transpose() const {
     matrix<T> transpose(colNum, rowNum);
 
@@ -384,7 +492,7 @@ matrix<T> matrix<T>::transpose() const {
     return transpose;
 }
 
-template <typename T>
+template <Arithmetic T>
 matrix<T> matrix<T>::inverse() const {
     if (this->rowNum != this->colNum || this->determinant() == 0) throw std::runtime_error("Matrix is not invertible");
 
@@ -395,7 +503,7 @@ matrix<T> matrix<T>::inverse() const {
     return aug.getRight();
 }
 
-template <typename T>
+template <Arithmetic T>
 std::vector<std::complex<double>> matrix<T>::eigenval() const {
     if (rowNum != colNum) throw std::invalid_argument("Eigenvalue not defined for non-square matrix");
     
@@ -413,7 +521,7 @@ std::vector<std::complex<double>> matrix<T>::eigenval() const {
                                             eigenvalues.data() + eigenvalues.size());
 }
 
-template <typename T>
+template <Arithmetic T>
 matrix<std::complex<double>> matrix<T>::eigenvec() const {
     if (rowNum != colNum)
         throw std::invalid_argument("Eigenvectors not defined for non-square matrix");
@@ -438,7 +546,7 @@ matrix<std::complex<double>> matrix<T>::eigenvec() const {
     return result;
 }
 
-template <typename T>
+template <Arithmetic T>
 int matrix<T>::rank() const {
     matrix<T> reduced = this->echelonf();
     int rank = 0;
@@ -450,5 +558,5 @@ int matrix<T>::rank() const {
     return rank;
 }
 
-template <typename T>
+template <Arithmetic T>
 int matrix<T>::nullity() const { return colNum - this->rank(); }
