@@ -4,7 +4,12 @@
 #include <concepts>
 #include <string>
 #include <vector>
-#include "rational.hpp"
+#include <iostream>
+#include <sstream>
+
+#include "matrix.hpp"
+#include "Rational.hpp"
+#include "util.hpp"
 
 template <typename T>
 concept Arithmetic = requires(T a, T b) {
@@ -92,13 +97,18 @@ private:
 
 public:
     // Default constructor (std::variant compatibility)
-    Matrix() : row(0), col(0) {};
+    matrix() : row(0), col(0) {};
 
     // Filler constructor
     matrix(long, long, T, FillType = FillType::EVERY);
 
     // String constructor
-    matrix(std::string, char = ';', char = ',');
+    matrix(std::string descriptor, char row_delimiter = ';', char column_delimiter = ',')  {
+        if (descriptor.find('[') != std::string::npos && descriptor.find(']') != std::string::npos) {
+            descriptor = descriptor.substr(descriptor.find('[') + 1, descriptor.find(']') - descriptor.find('[') - 1);
+        } else if (descriptor.find('[') != std::string::npos && descriptor.find(']') != std::string::npos) {
+            throw MalformedMatrixException("[ was never closed");
+        }
 
         std::istringstream iss(descriptor);
         std::string row_tkn;
@@ -109,10 +119,10 @@ public:
             while (std::getline(row_iss, tkn, column_delimiter) && !tkn.empty()) {
                 row.push_back(from_string<T>(tkn));
             }
-            this->matrix.push_back(row);
+            this->data.push_back(row);
         }
-        this->row = this->matrix.size();
-        this->col = this->row > 0 ? this->matrix[0].size() : 0;
+        this->row = this->data.size();
+        this->col = this->row > 0 ? this->data[0].size() : 0;
     }
 
     // Insert value at [r,c] (in-place)
@@ -134,7 +144,7 @@ public:
         for (int i = 0; i < row; i++) {
             for (int j = 0; j < this->col; j++) {
                 if (i != 0 && j == 0) oss << " ";
-                oss << this->matrix[i][j];
+                oss << this->data[i][j];
                 if (j != this->col - 1) {
                     oss << column_delimiter;
                     if (tab) oss << "\t";
@@ -160,9 +170,9 @@ public:
     matrix<T> operator*(const T) const;
     matrix<T> operator/(const matrix<T>&) const;
 
-    matrix<T>& matrix<T>::operator+=(const matrix<T>& other);
-    matrix<T>& matrix<T>::operator-=(const matrix<T>& other);
-    matrix<T>& matrix<T>::operator*=(T scalar);
+    matrix<T>& operator+=(const matrix<T>& other);
+    matrix<T>& operator-=(const matrix<T>& other);
+    matrix<T>& operator*=(T scalar);
 
     // Matrix arithmetics (method invoc.)
 
@@ -217,10 +227,10 @@ public:
     Solution solve(Vector) const;
     
     // Diagnoize the matrix
-    Matrix<T> diagonize() const;
+    matrix<T> diagonize() const;
 
     // LU Factorization
-    Matrix<T> LU() const;
+    matrix<T> LU() const;
 
     // Get the norm(1-norm, infinity norm, euclidean norm) of a matrix
     long norm(std::string) const;
@@ -236,9 +246,3 @@ public:
     // Get dimension of matrix
     long dim() const;
 };
-
-
-template <Arithmetic T>
-std::ostream& operator<<(std::ostream& os, const Matrix<T> matrix) {
-    return os << matrix.toString();
-}

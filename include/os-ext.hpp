@@ -3,7 +3,7 @@
  */
 #pragma once
 #include "Rational.hpp"
-#include "Matrix.hpp"
+#include "matrix.hpp"
 #include "CLI.hpp"
 
 inline std::ostream& operator<<(std::ostream& os, const std::monostate& _) {
@@ -48,6 +48,11 @@ inline std::ostream& operator<<(std::ostream& os, const Variable::ExactType& typ
         case Variable::ExactType::VOID:
             return os << "<void>";
     }
+}
+
+template <typename T>
+inline std::ostream& operator<<(std::ostream& os, const matrix<T>& mat) {
+    return os << mat.toString();
 }
 
 inline std::ostream& operator<<(std::ostream& os, const Rational& rational) {

@@ -99,7 +99,7 @@ $(MAIN): $(OBJECTS)
 trat:
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -DDEBUG_RATIONAL src/Rational.cpp -o tmp-exec/rational && tmp-exec/rational
 tmat:
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -DDEBUG_MATRIX src/Matrix.cpp src/Rational.cpp src/Useful.cpp -o tmp-exec/matrix && tmp-exec/matrix
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -DDEBUG_MATRIX src/Matrix.cpp src/Rational.cpp -o tmp-exec/matrix && tmp-exec/matrix
 
 tcli:
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -DDEBUG_CLI src/CLI.cpp $(MRD) -o tmp-exec/cli && tmp-exec/cli

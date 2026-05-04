@@ -5,7 +5,7 @@
 #include <strstream>
 #include <memory>
 
-#include "Matrix.hpp"
+#include "matrix.hpp"
 #include "Rational.hpp"
 
 // Variable serialization
@@ -47,9 +47,9 @@ struct Variable {
     */
 
     using VarStore = std::variant<
-        Matrix<double>,
-        Matrix<long>,
-        Matrix<Rational>,
+        matrix<double>,
+        matrix<long>,
+        matrix<Rational>,
         std::vector<double>,
         std::vector<long>,
         std::vector<Rational>,

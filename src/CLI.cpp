@@ -56,15 +56,15 @@ Variable::Variable(std::string var) {
         case VarType::MATRIX:
             switch (this->etype) {
                 case ExactType::NUMBER:
-                    this->self = Matrix<long>(var);
+                    this->self = matrix<long>(var);
                     break;
 
                 case ExactType::DECIMAL:
-                    this->self = Matrix<double>(var);
+                    this->self = matrix<double>(var);
                     break;
 
                 case ExactType::RATIONAL:
-                    this->self = Matrix<Rational>(var);
+                    this->self = matrix<Rational>(var);
                     break;
 
                 // No string matrices...
