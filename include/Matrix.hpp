@@ -1,23 +1,22 @@
+/*
+ * The matrix interface
+ */
+
 #pragma once
 
 #include <exception>
-#include <concepts>
 #include <string>
 #include <vector>
-#include <iostream>
 #include <sstream>
+#include <iomanip>
+#include <stdexcept>
+#include <algorithm>
 
 #include "matrix.hpp"
-#include "Rational.hpp"
+#include "rational.hpp"
 #include "util.hpp"
-
-template <typename T>
-concept Arithmetic = requires(T a, T b) {
-    a + b;
-    a - b;
-    a * b;
-    a / b;
-};
+#include "aug_matrix.hpp"
+#include "concepts.hpp"
 
 enum class FillType {
     UPPER_TRI,

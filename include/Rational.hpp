@@ -4,9 +4,8 @@
 
 #pragma once
 #include <sstream>
-#include <ostream>
 
-class Rational {
+class rational {
     long num, denom;
 
 public:
@@ -19,7 +18,7 @@ public:
      *
      * @return A Rational type
      */
-    Rational(long, long);
+    rational(long, long);
 
     /**
      * Instantiates a fraction based on a string descriptor and a delimiter
@@ -29,7 +28,7 @@ public:
      *
      * @return A Rational type
      */
-    Rational(std::string, char = '/');
+    rational(std::string, char = '/');
 
     /**
      * Instantiates a fraction based on an integer
@@ -39,7 +38,7 @@ public:
      *
      * @return A Rational type
      */
-    Rational(long);
+    rational(long);
 
     /**
      * Adds two Rational number
@@ -48,7 +47,7 @@ public:
      *
      * @return A Rational type
      */
-    Rational operator+(const Rational&) const;
+    rational operator+(const rational&) const;
 
     /**
      * Subtract two Rational number
@@ -57,7 +56,7 @@ public:
      *
      * @return A Rational type
      */
-    Rational operator-(const Rational&) const;
+    rational operator-(const rational&) const;
 
     /**
      * Multiply two Rational number
@@ -66,7 +65,7 @@ public:
      *
      * @return A Rational type
      */
-    Rational operator*(const Rational&) const;
+    rational operator*(const rational&) const;
 
     /**
      * Subtract
@@ -75,21 +74,21 @@ public:
      *
      * @return A Rational type
      */
-    Rational operator/(const Rational&) const;
+    rational operator/(const rational&) const;
 
     /**
      * Find the multiplicative inverse of a Rational
      *
      * @return A Rational type
      */
-    Rational inv() const;
+    rational inv() const;
 
     /**
      * Find the additive inverse of a Rational
      *
      * @return A Rational type
      */
-    Rational neg() const;
+    rational neg() const;
 
     /**
      * Find the additive inverse of a Rational
@@ -104,9 +103,3 @@ public:
         return ss.str();
     }
 };
-
-/*
-inline std::ostream& operator<<(std::ostream& os, const Rational& rational) {
-    return os << rational.toString();
-}
-*/

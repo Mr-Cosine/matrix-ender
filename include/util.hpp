@@ -1,5 +1,14 @@
+/*
+ * Useful helper functions
+ */
+
 #pragma once
-#include "Rational.hpp"
+#include "rational.hpp"
+#include <string>
+
+/**
+ * Parse to number type from string
+ */
 
 template <typename T>
 T from_string(std::string);
@@ -35,6 +44,67 @@ inline char from_string<char>(std::string str) {
 }
 
 template <>
-inline Rational from_string<Rational>(std::string str) {
-    return Rational(str);
+inline rational from_string<rational>(std::string str) {
+    return rational(str);
+}
+
+/**
+ * Utility functions
+ * 
+ * The following function's definition may be requested at compile time
+ * Thus must be kept in header
+ */
+// Bidirectional trimming
+inline std::string trim(std::string str) {
+    size_t bgn, end;
+    for (bgn = 0; !std::isspace(str[bgn]); bgn++);
+    for (end = str.size() - 1; !std::isspace(str[end]); end--);
+    return str.substr(bgn, end - bgn);
+}
+
+// Left trimming
+inline std::string ltrim(std::string str) {
+    size_t bgn;
+    for (bgn = 0; !std::isspace(str[bgn]); bgn++);
+    return str.substr(bgn, str.size() - bgn);
+}
+
+// Right trimming
+inline std::string rtrim(std::string str) {
+    size_t end;
+    for (end = str.size() - 1; !std::isspace(str[end]); end--);
+    return str.substr(0, end + 1);
+}
+
+inline std::vector<std::string> split(std::string str, char delimiter) {
+    std::istringstream iss(str);
+    std::vector<std::string> ss;
+    std::string cur{};
+    while (std::getline(iss, cur, delimiter)) {
+        ss.push_back(cur);
+    }
+    return ss;
+}
+
+// Global removal
+inline std::string removeAll(std::string str, char which) {
+    for (size_t i = 0; i < str.size(); i++) {
+        if (str[i] == which) str.erase(i, 1);
+    }
+    return str;
+};
+
+inline size_t count(std::string haystack, char needle) {
+    size_t count = 0;
+    for (const char& c: haystack) {
+        if (c == needle) count++;
+    }
+    return count;
+}
+
+// Greedy search
+inline std::string delimitBy(std::string str, char from, char to) {
+    size_t start = str.find_first_of(from);
+    size_t end = str.find_last_of(to);
+    return str.substr(start + 1, end - start);
 }

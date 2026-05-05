@@ -1,8 +1,11 @@
 /*
  * ostream extension
+ * 
+ * Custom class print logic
  */
+
 #pragma once
-#include "Rational.hpp"
+#include "rational.hpp"
 #include "matrix.hpp"
 #include "CLI.hpp"
 
@@ -15,8 +18,6 @@ inline std::ostream& operator<<(std::ostream& os, const Variable::VarType& type)
     switch (type) {
         case Variable::VarType::MATRIX:
             return os << "[Matrix]";
-        case Variable::VarType::VECTOR:
-            return os << "[Vector]";
         case Variable::VarType::PRIMITIVE:
             return os << "[Primitive]";
         default:
@@ -55,6 +56,6 @@ inline std::ostream& operator<<(std::ostream& os, const matrix<T>& mat) {
     return os << mat.toString();
 }
 
-inline std::ostream& operator<<(std::ostream& os, const Rational& rational) {
+inline std::ostream& operator<<(std::ostream& os, const rational& rational) {
     return os << rational.toString();
 }

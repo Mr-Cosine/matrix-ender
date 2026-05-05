@@ -1,10 +1,9 @@
-#include <iostream>
 #include "CLI.hpp"
-#include "os-ext.hpp"
+#include "oext.hpp" // <-- must be included after CLI enum declaration
+
 
 #ifdef DEBUG_CLI
 using std::cout, std::cin, std::endl;
-
 int main() {
     cout << "===== MATRIX-ENDER TERMINAL (DEBUG) =====\n";
     cout << "MET(v0.0) by A1batr0z & Mr-Cosine | Enter `help` to get help list.\n" << endl;
@@ -35,11 +34,6 @@ Variable::Variable(std::string var) {
             break;
         }
 
-        case VarType::VECTOR: {
-            tkn = delimitBy(tkn, '[', ';');
-            break;
-        }
-
         default: {
             tkn = var;
             break;
@@ -64,7 +58,7 @@ Variable::Variable(std::string var) {
                     break;
 
                 case ExactType::RATIONAL:
-                    this->self = matrix<Rational>(var);
+                    this->self = matrix<rational>(var);
                     break;
 
                 // No string matrices...
@@ -73,24 +67,7 @@ Variable::Variable(std::string var) {
                     return;
             }
             break;
-        case VarType::VECTOR:
-            switch (this->etype) {
-                /*
-                TODO: Implement parse_vector<T>(std::string);
 
-                case ExactType::NUMBER:
-                    break;
-                case ExactType::DECIMAL:
-                    break;
-                case ExactType::RATIONAL:
-                    break;
-                */
-
-                default:
-                    this->self = std::monostate{};
-                    return;
-            }
-            break;
         case VarType::PRIMITIVE:
             switch (this->etype) {
                 case ExactType::NUMBER:
@@ -102,7 +79,7 @@ Variable::Variable(std::string var) {
                     break;
 
                 case ExactType::RATIONAL:
-                    this->self = Rational(var);
+                    this->self = rational(var);
                     break;
 
                 case ExactType::STRING:
@@ -138,17 +115,12 @@ Variable::ExactType Variable::exact_type_of(std::string tkn) {
 
 Variable::VarType Variable::var_type_of(std::string token) {
     token = removeAll(token, ' ');
-    bool isVector = token.find('[') != std::string::npos
-                    && token.find(']') != std::string::npos
-                    && token.find(',') != std::string::npos;
     bool isMatrix = token.find('[') != std::string::npos
                     && token.find(']') != std::string::npos
-                    && token.find(',') != std::string::npos
-                    && token.find(';') != std::string::npos;
+                    && (token.find(',') != std::string::npos
+                    || token.find(';') != std::string::npos);
     if (isMatrix) {
         return VarType::MATRIX;
-    } else if (isVector) {
-        return VarType::VECTOR;
     } else {
         return VarType::PRIMITIVE;
     }
@@ -193,36 +165,3 @@ std::string parse_command(std::string cmd) {
     }
 }
 */
-
-// Helper functions
-
-// Bidirectional trimming
-std::string trim(std::string str) {
-    size_t bgn, end;
-    for (bgn = 0; !std::isspace(str[bgn]); bgn++);
-    for (end = str.size() - 1; !std::isspace(str[end]); end--);
-    return str.substr(bgn, end - bgn);
-}
-
-// Global removal
-std::string removeAll(std::string str, char which) {
-    for (size_t i = 0; i < str.size(); i++) {
-        if (str[i] == which) str.erase(i, 1);
-    }
-    return str;
-};
-
-size_t count(std::string haystack, char needle) {
-    size_t count = 0;
-    for (const char& c: haystack) {
-        if (c == needle) count++;
-    }
-    return count;
-}
-
-// Greedy search
-std::string delimitBy(std::string str, char from, char to) {
-    size_t start = str.find_first_of(from);
-    size_t end = str.find_last_of(to);
-    return str.substr(start + 1, end - start);
-}

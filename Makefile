@@ -64,7 +64,7 @@ OBJECTS		:= $(SOURCES:.cpp=.o)
 DEPS		:= $(OBJECTS:.o=.d)
 
 # Matrix + Rational dependencies
-MRD := src/Matrix.cpp src/Rational.cpp
+MRD := src/Matrix.cpp src/rational.cpp
 
 #
 # The following part of the makefile is generic; it can be used to
@@ -96,14 +96,16 @@ $(MAIN): $(OBJECTS)
 
 .PHONY: clean
 
+# Local testing
 trat:
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -DDEBUG_RATIONAL src/Rational.cpp -o tmp-exec/rational && tmp-exec/rational
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -DDEBUG_RATIONAL src/rational.cpp -o tmp-exec/rational && tmp-exec/rational
 tmat:
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -DDEBUG_MATRIX src/Matrix.cpp src/Rational.cpp -o tmp-exec/matrix && tmp-exec/matrix
-
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -DDEBUG_MATRIX $(MRD) -o tmp-exec/matrix && tmp-exec/matrix
 tcli:
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -DDEBUG_CLI src/CLI.cpp $(MRD) -o tmp-exec/cli && tmp-exec/cli
 
+
+# Python testcases
 tcrat:
 	@echo
 	python3 $(TEST_PATH)rationals.py $(TEST_CASE_COUNT)

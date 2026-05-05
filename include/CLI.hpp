@@ -1,18 +1,24 @@
+/*
+ * The command line interface
+ */
+
 #pragma once
+
 #include <unordered_map>
 #include <string>
 #include <variant>
-#include <strstream>
+#include <sstream>
 #include <memory>
+#include <iostream>
 
 #include "matrix.hpp"
-#include "Rational.hpp"
+#include "rational.hpp"
+#include "util.hpp"
 
 // Variable serialization
 struct Variable {
     enum class VarType {
         MATRIX,
-        VECTOR,
         PRIMITIVE
     };
 
@@ -24,36 +30,14 @@ struct Variable {
         VOID
     };
 
-    /*
-    using _matrix = std::variant<
-        Matrix<int>,
-        Matrix<float>,
-        Matrix<double>,
-        Matrix<Rational>,
-        Matrix<long>,
-        Matrix<short>
-    >;
-
-    using _vector = std::variant<
-        std::vector<int>,
-        std::vector<float>,
-        std::vector<double>,
-        std::vector<Rational>,
-        std::vector<long>,
-        std::vector<short>
-    >;
-
-    using _primi = std::variant<int, float, double, Rational, long, short, char, std::string, std::monostate>;
-    */
-
     using VarStore = std::variant<
         matrix<double>,
         matrix<long>,
-        matrix<Rational>,
+        matrix<rational>,
         std::vector<double>,
         std::vector<long>,
-        std::vector<Rational>,
-        double, long, Rational, std::string, std::monostate
+        std::vector<rational>,
+        double, long, rational, std::string, std::monostate
     >;
 
     VarStore self;
@@ -77,15 +61,3 @@ void print_var(std::string);
 
 // Command parsing
 std::string parse_command(std::string);
-
-// Bidirectional trimming
-std::string trim(std::string);
-
-// Global removal
-std::string removeAll(std::string, char);
-
-// Count char occurrences
-size_t count(std::string, char);
-
-// Greedy search
-std::string delimitBy(std::string, char, char);

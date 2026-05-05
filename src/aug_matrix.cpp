@@ -5,29 +5,32 @@ TODO list:
     3. Check for invalid access to data member.
 */
 
-#include "augMatrix.hpp"
+#include "aug_matrix.hpp"
 #include <iostream>
 #include <vector>
 #include <string>
 #include <iomanip>
 #include <sstream>
 
-template <typename T>
-augMatrix<T>::augMatrix(matrix<T> inputLeft, matrix<T> inputRight) :
+// Use Arithmetic concept instead of typename
+template <Arithmetic T>
+augmented_matrix<T>::augmented_matrix(matrix<T> inputLeft, matrix<T> inputRight) :
     left(std::move(inputLeft)),
     right(std::move(inputRight))
 {
     if (left.getRow() != right.getRow()) throw std::invalid_argument("Matrix have inconsistent row number");
 }
 
-template <typename T>
-augMatrix<T>::augMatrix(const augMatrix<T>& inputMatrix) :    
+/*
+template <Arithmetic T>
+augmented_matrix<T>::augmented_matrix(const augmented_matrix<T>& inputMatrix) :    
     left(inputMatrix.left),
     right(inputMatrix.right)
 {}
+*/
 
-template <typename T>
-void augMatrix<T>::put(int r, int c, T value, std::string side) {
+template <Arithmetic T>
+void augmented_matrix<T>::put(int r, int c, T value, std::string side) {
     if (side == "left") {
         if (r >= left.getRow()) throw std::out_of_range("Row index " + std::to_string(r) + " out of bounds");
         if (c >= left.getCol()) throw std::out_of_range("Column index " + std::to_string(c) + " out of bounds");
@@ -43,8 +46,8 @@ void augMatrix<T>::put(int r, int c, T value, std::string side) {
     else throw std::invalid_argument("Must be either 'left' or 'right', got: " + side);
 }
 
-template <typename T>
-T augMatrix<T>::get(int r, int c, std::string side) const{
+template <Arithmetic T>
+T augmented_matrix<T>::get(int r, int c, std::string side) const{
     if (side == "left") {
         if (r >= left.getRow()) throw std::out_of_range("Row index " + std::to_string(r) + " out of bounds");
         if (c >= left.getCol()) throw std::out_of_range("Column index " + std::to_string(c) + " out of bounds");
@@ -60,14 +63,14 @@ T augMatrix<T>::get(int r, int c, std::string side) const{
     else throw std::invalid_argument("Must be either 'left' or 'right', got: " + side);
 }
 
-template <typename T>
-matrix<T> augMatrix<T>::getLeft() const { return left; }
+template <Arithmetic T>
+matrix<T> augmented_matrix<T>::getLeft() const { return left; }
 
-template <typename T>
-matrix<T> augMatrix<T>::getRight() const { return right; }
+template <Arithmetic T>
+matrix<T> augmented_matrix<T>::getRight() const { return right; }
 
-template <typename T>
-void augMatrix<T>::display() const {
+template <Arithmetic T>
+void augmented_matrix<T>::display() const {
     if (left.getRow() == 0) { std::cout << "[empty]"; return; }
 
     for (int i = 0; i < left.getRow(); i++) {
@@ -82,8 +85,8 @@ void augMatrix<T>::display() const {
     }
 }
 
-template <typename T>
-matrix<T> augMatrix<T>::merge() const {
+template <Arithmetic T>
+matrix<T> augmented_matrix<T>::merge() const {
     matrix<T> merged(left.getRow(), left.getCol() + right.getCol());
 
     for (int r = 0; r < left.getRow(); ++r) {
@@ -96,8 +99,8 @@ matrix<T> augMatrix<T>::merge() const {
     return merged;
 }
 
-template <typename T>
-augMatrix<T> augMatrix<T>::split(const matrix<T>& inputMatrix) const {
+template <Arithmetic T>
+augmented_matrix<T> augmented_matrix<T>::split(const matrix<T>& inputMatrix) const {
     if (inputMatrix.getRow() != left.getRow() || inputMatrix.getCol() != left.getCol() + right.getCol()) throw std::runtime_error("Split failed: incompatible size");
     
     matrix<T> newLeft(this->left.getRow(), this->left.getCol());
@@ -112,11 +115,11 @@ augMatrix<T> augMatrix<T>::split(const matrix<T>& inputMatrix) const {
         }
     }
 
-    return augMatrix<T>(newLeft, newRight);
+    return augmented_matrix<T>(newLeft, newRight);
 }
 
-template <typename T>
-void augMatrix<T>::rowOp(int r1, int c1, int r2, int c2) {
+template <Arithmetic T>
+void augmented_matrix<T>::rowOp(int r1, int c1, int r2, int c2) {
     if (r1 < 0 || r1 >= left.getRow() || r2 < 0 || r2 >= left.getRow()) throw std::invalid_argument("Row index out of bounds");
 
     if (c1 == 0) throw std::invalid_argument("cannot replace the row");
@@ -127,23 +130,23 @@ void augMatrix<T>::rowOp(int r1, int c1, int r2, int c2) {
     return;
 }
 
-template <typename T>
-augMatrix<T> augMatrix<T>::echelonf() const {
+template <Arithmetic T>
+augmented_matrix<T> augmented_matrix<T>::echelonf() const {
     matrix<T> merged(this->merge());
     return this->split(merged.echelonf(left.getCol()));
 }
 
-template <typename T>
-augMatrix<T> augMatrix<T>::rref() const {
+template <Arithmetic T>
+augmented_matrix<T> augmented_matrix<T>::rref() const {
     matrix<T> merged(this->merge());
     return this->split(merged.rref(left.getCol()));
 }
 
-template <typename T>
-std::vector<std::vector<T>> augMatrix<T>::solve() const {
+template <Arithmetic T>
+std::vector<std::vector<T>> augmented_matrix<T>::solve() const {
     if (right.getCol() > 1) throw std::runtime_error("Right hand side have to be 1.");
     
-    augMatrix<T> reduced = this->rref();
+    augmented_matrix<T> reduced = this->rref();
 
     struct Pivot {
         int row, col;
@@ -163,6 +166,7 @@ std::vector<std::vector<T>> augMatrix<T>::solve() const {
                 for (const auto& pivot : pivots) {
                     if (pivot.col == c) { existing = true; break; }
                 }
+
                 if (!existing) {
                     pivots.push_back(Pivot(r, c));
                 }
@@ -201,8 +205,8 @@ std::vector<std::vector<T>> augMatrix<T>::solve() const {
     return solution;
 }
 
-template <typename T>
-bool augMatrix<T>::inSpan() const {
+template <Arithmetic T>
+bool augmented_matrix<T>::inSpan() const {
     try {
         this->solve();
     }

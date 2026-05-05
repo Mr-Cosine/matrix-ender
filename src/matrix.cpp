@@ -6,12 +6,6 @@ TODO list:
 
 #include "matrix.hpp"
 #include <iostream>
-#include <vector>
-#include <string>
-#include <sstream>
-#include <iomanip>
-#include <stdexcept>
-#include <algorithm>
 
 /*
 #include <type_traits>
@@ -26,9 +20,7 @@ inline std::ostream& operator<<(std::ostream& os, const matrix<T>& mat) {
 }
 */
 
-template <typename T>
-class augMatrix;
-
+/* Use the conditional compilation block for local testing */
 #ifdef DEBUG_MATRIX
 using std::cout, std::cin, std::endl;
 // Print helper
@@ -37,7 +29,7 @@ void print(Args... args) {
     ((cout << args << " "), ...);
     cout << endl;
 }
-inline std::ostream& operator<<(std::ostream& os, const Rational& rational) {
+inline std::ostream& operator<<(std::ostream& os, const rational& rational) {
     return os << rational.toString();
 }
 #endif
@@ -134,7 +126,7 @@ int main() {
 
     matrix<int> mymat(4, 4, 1, FillType::UPPER_TRI_R);
     mymat.print();
-    matrix<Rational> myratmat(4, 4, 2, FillType::LOWER_TRI);
+    matrix<rational> myratmat(4, 4, 2, FillType::LOWER_TRI);
     myratmat.print();
     matrix<int> strmat("1,2,3;4,5,6;7,8,9,;");
     strmat.print();
@@ -522,7 +514,7 @@ matrix<T> matrix<T>::inverse() const {
     if (this->row != this->col || this->determinant() == 0) throw std::runtime_error("Matrix is not invertible");
 
     matrix<T> I(this->row, this->col, "identity");
-    augMatrix<T> aug(*this, I);
+    augmented_matrix<T> aug(*this, I);
     aug = aug.rref();
 
     return aug.getRight();
