@@ -21,23 +21,15 @@ augmented_matrix<T>::augmented_matrix(matrix<T> inputLeft, matrix<T> inputRight)
     if (left.getRow() != right.getRow()) throw std::invalid_argument("Matrix have inconsistent row number");
 }
 
-/*
 template <Arithmetic T>
-augmented_matrix<T>::augmented_matrix(const augmented_matrix<T>& inputMatrix) :    
-    left(inputMatrix.left),
-    right(inputMatrix.right)
-{}
-*/
-
-template <Arithmetic T>
-void augmented_matrix<T>::put(int r, int c, T value, std::string side) {
-    if (side == "left") {
+void augmented_matrix<T>::put(int r, int c, T value, Side side) {
+    if (side == Side::LEFT) {
         if (r >= left.getRow()) throw std::out_of_range("Row index " + std::to_string(r) + " out of bounds");
         if (c >= left.getCol()) throw std::out_of_range("Column index " + std::to_string(c) + " out of bounds");
         
         left.put(r, c, value);
     }
-    else if (side == "right") {
+    else if (side == Side::RIGHT) {
         if (r >= right.getRow()) throw std::out_of_range("Row index " + std::to_string(r) + " out of bounds");
         if (c >= right.getCol()) throw std::out_of_range("Column index " + std::to_string(c) + " out of bounds");
 
@@ -47,14 +39,14 @@ void augmented_matrix<T>::put(int r, int c, T value, std::string side) {
 }
 
 template <Arithmetic T>
-T augmented_matrix<T>::get(int r, int c, std::string side) const{
-    if (side == "left") {
+T augmented_matrix<T>::get(int r, int c, Side side) const{
+    if (side == LEFT) {
         if (r >= left.getRow()) throw std::out_of_range("Row index " + std::to_string(r) + " out of bounds");
         if (c >= left.getCol()) throw std::out_of_range("Column index " + std::to_string(c) + " out of bounds");
         
         return left.get(r, c);
     }
-    else if (side == "right") {
+    else if (side == Side::RIGHT) {
         if (r >= right.getRow()) throw std::out_of_range("Row index " + std::to_string(r) + " out of bounds");
         if (c >= right.getCol()) throw std::out_of_range("Column index " + std::to_string(c) + " out of bounds");
 
@@ -64,10 +56,11 @@ T augmented_matrix<T>::get(int r, int c, std::string side) const{
 }
 
 template <Arithmetic T>
-matrix<T> augmented_matrix<T>::getLeft() const { return left; }
-
-template <Arithmetic T>
-matrix<T> augmented_matrix<T>::getRight() const { return right; }
+matrix<T> augmented_matrix<T>::getSide(Side side) const { 
+    if (side == Side::LEFT) return left; 
+    else if (side == Side::RIGHT) return right;
+    else throw std::invalid_argument("Must be either 'left' or 'right', got: " + side)
+}
 
 template <Arithmetic T>
 void augmented_matrix<T>::display() const {
@@ -190,18 +183,20 @@ std::vector<std::vector<T>> augmented_matrix<T>::solve() const {
 
     solution.push_back(particular);
 
-    for (int c = 0; c < reduced.left.getCol(); c++) {
-        bool isFree = true; for (const auto& p : pivots) if (p.col == c) { isFree = false; break; }
+    if (pivots.size() < colNum) {
+        for (int c = 0; c < reduced.left.getCol(); c++) {
+            bool isFree = true; for (const auto& p : pivots) if (p.col == c) { isFree = false; break; }
 
-        std::vector<T> vec(reduced.left.getCol(), T(0));
-        if (isFree) {
-            vec[c] = T(1);
-            for (const auto& pivot : pivots)
-                vec[pivot.col] = -reduced.left.get(p.row, c);
+            std::vector<T> vec(reduced.left.getCol(), T(0));
+            if (isFree) {
+                vec[c] = T(1);
+                for (const auto& pivot : pivots)
+                    vec[pivot.col] = -reduced.left.get(p.row, c);
+            }
+            solution.push_back(vec);
         }
-        solution.push_back(vec);
     }
-
+    
     return solution;
 }
 

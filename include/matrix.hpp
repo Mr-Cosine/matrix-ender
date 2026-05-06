@@ -23,7 +23,21 @@ enum class FillType {
     UPPER_TRI_R,
     LOWER_TRI,
     LOWER_TRI_R,
-    EVERY
+    EVERY,
+    DIAGONAL
+};
+
+// Matrix Solution Result Type
+template <Arithmetic T>
+struct Solution {
+    enum class SolutionType {
+        NIL,
+        UNIQUE,
+        INFINITE
+    };
+
+    std::vector<std::vector<T>> vector_group;
+    SolutionType type;
 };
 
 template <Arithmetic T>
@@ -33,20 +47,6 @@ private:
     long col;
     std::vector<std::vector<T>> data;
     using Vector = std::vector<T>;
-
-    // Matrix Solution Result Type
-    struct Solution {
-    private:
-        enum class SolutionType {
-            NIL,
-            UNIQUE,
-            INFINITE
-        };
-
-    public:
-        Vector vector;
-        SolutionType type;
-    };
 
     // Matrix Exception Types
     class NotInvertibleMatrixException: public std::exception {
@@ -100,6 +100,17 @@ public:
 
     // Filler constructor
     matrix(long, long, T, FillType = FillType::EVERY);
+
+    //Constructor from a vector
+    matrix(const Vector& vector) :
+        row(vector.size()),
+        col(1),
+        data(row, std::vector<T>(col))
+    {
+        for (int r = 0; r < vector.size(); r++) {
+            data[r][0] = vector[r];
+        }
+    }
 
     // String constructor
     matrix(std::string descriptor, char row_delimiter = ';', char column_delimiter = ',')  {
@@ -169,12 +180,11 @@ public:
     matrix<T> operator*(const T) const;
     matrix<T> operator/(const matrix<T>&) const;
 
-    matrix<T>& operator+=(const matrix<T>& other);
-    matrix<T>& operator-=(const matrix<T>& other);
-    matrix<T>& operator*=(T scalar);
+    matrix<T>& operator+=(const matrix<T>&);
+    matrix<T>& operator-=(const matrix<T>&);
+    matrix<T>& operator*=(T);
 
     // Matrix arithmetics (method invoc.)
-
     matrix<T> add(const matrix<T>&) const;
     matrix<T> sub(const matrix<T>&) const;
     matrix<T> mult(const matrix<T>&) const;
@@ -196,11 +206,11 @@ public:
 
     // get row echelon form
     matrix<T> ref() const;
-    matrix<T> ref(long) const;
+    matrix<T> ref(long) const; //echelon but up until a column, not to end
 
     // get reduced row echelon form
     matrix<T> rref() const;
-    matrix<T> rref(long) const;
+    matrix<T> rref(long) const; //rref but up until a column, not to end
 
     // Get determinant
     T det() const;
@@ -211,28 +221,25 @@ public:
     // Get inverse (throws NotInvertibleMatrixException if not invertible)
     matrix<T> inverse() const;
 
-    // Get eigenvalues
-    Vector eigenval() const;
-
-    // Get eigenvectors
-    std::vector<Vector> eigenvec() const;
-
     // Check if a vector is in the matrix's spanning space
     // FROM [//determine if a vector b is within the span(in column space/ being the linear combination) of matrix]
     bool inspan(Vector) const;
 
     // Determine type of solution(unique, infinite, nil) & solve the matrix with the input vector b
     // Reading from Solution.vector when Solution.type = infinite / nil is undefined behavior
-    Solution solve(Vector) const;
+    Solution<T> solve(Vector) const;
+
+    // Get eigenvalues
+    //Vector eigenval() const;
+
+    // Get eigenvectors
+    //std::vector<Vector> eigenvec() const;
     
-    // Diagnoize the matrix
-    matrix<T> diagonize() const;
+    // Diagnoize the matrix (didn't make)
+    //matrix<T> diagonize() const;
 
-    // LU Factorization
-    matrix<T> LU() const;
-
-    // Get the norm(1-norm, infinity norm, euclidean norm) of a matrix
-    long norm(std::string) const;
+    // LU Factorization (didn't make)
+    //matrix<T> LU() const; 
 
     // Matrix properties
 
@@ -240,8 +247,11 @@ public:
     long rank() const;
 
     // Get nullity of matrix                                              
-    long null() const;
+    long nullity() const;
+
+    long getRow() const { return this->row; }
+    long getCol() const { return this->col; }
 
     // Get dimension of matrix
-    long dim() const;
+    std::vector<long> dim() const;
 };
