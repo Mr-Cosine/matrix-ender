@@ -154,7 +154,7 @@ public:
                 if (line_break) oss << "\n";
             }
         }
-        oss << "]" << std::endl;
+        oss << "]";
         return oss.str();
     }
     
