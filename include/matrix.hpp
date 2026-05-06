@@ -94,6 +94,29 @@ private:
         }
     };
 
+    class ComputationFailedException: public std::exception {
+    private:
+        std::string message;
+    public:
+        explicit ComputationFailedException(std::string message) : message(message) {}
+
+        const char* what() const noexcept override {
+            return this->message.c_str();
+        }
+    };
+
+    class InvalidMatricesPairException: public std::exception {
+    private:
+        std::string message;
+    public:
+        explicit InvalidMatricesPairException(std::string message) : message(message) {}
+
+        const char* what() const noexcept override {
+            return this->message.c_str();
+        }
+    };
+
+
 public:
     // Default constructor (std::variant compatibility)
     matrix() : row(0), col(0) {};
