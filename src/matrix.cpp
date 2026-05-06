@@ -327,7 +327,7 @@ matrix<T> matrix<T>::div(const matrix<T>& inputMatrix) const { return this * inp
 
 template <Arithmetic T>
 void matrix<T>::ro(long r1, long n1, long r2, long n2) {
-    if (n1 == 0) throw IndexOutOfBoundException("n1 cannot be 0 for row operation r1 = n1r1 + n2r2")
+    if (n1 == 0) throw IndexOutOfBoundException("n1 cannot be 0 for row operation r1 = n1r1 + n2r2");
     if (r1 >= this->row || r2 >= this->row ) throw IndexOutOfBoundException("r1 and/or r2 out of bound");
     for (int c = 0; c < this->col; c++) {
         this->data[r1][c] = n1 * this->data[r1][c] + n2 * this->data[r2][c];
@@ -336,10 +336,10 @@ void matrix<T>::ro(long r1, long n1, long r2, long n2) {
 
 template <Arithmetic T>
 void matrix<T>::co(long c1, long n1, long c2, long n2) {
-    if (n1 == 0) throw IndexOutOfBoundException("n1 cannot be 0 for column operation c1 = n1c1 + n2c2")
-    if (c1 >= this->row || c2 >= this->row) throw IndexOutOfBoundException("c1 and/or c2 out of bound");
+    if (n1 == 0) throw IndexOutOfBoundException("n1 cannot be 0 for column operation c1 = n1c1 + n2c2");
+    if (c1 >= this->col || c2 >= this->col) throw IndexOutOfBoundException("c1 and/or c2 out of bound");
     for (int r = 0; r < this->row; r++) {
-        this->data[c1][r] = n1 * this->data[c1][r] + n2 * this->data[c2][r];
+        this->data[r][c1] = n1 * this->data[r][c1] + n2 * this->data[r][c2];
     }
 }
 
@@ -504,11 +504,12 @@ template <Arithmetic T>
 matrix<T> matrix<T>::inverse() const {
     if (this->row != this->col || this->det() == 0) throw NotInvertibleMatrixException("Matrix is not invertible");
 
-    matrix<T> I(this->row, this->col, "identity");
+    matrix<T> I(this->row, this->col, 1, FillType::DIAGONAL);
+
     augmented_matrix<T> aug(*this, I);
     aug = aug.rref();
 
-    return aug.getRight();
+    return aug.getSide(augmented_matrix<T>::Side::RIGHT);
 }
 
 /*
