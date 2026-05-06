@@ -5,12 +5,9 @@
 #include <vector>
 
 #include "concepts.hpp"
+#include "matrix.hpp"
 
 /* Suggestions --> */ /* are wrapped in multiline comments */
-
-// Forward declare matrix to prevent circular import
-template <Arithmetic T>
-class matrix;
 
 template <Arithmetic T>
 class augmented_matrix {

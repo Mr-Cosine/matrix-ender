@@ -12,10 +12,8 @@
 #include <stdexcept>
 #include <algorithm>
 
-#include "matrix.hpp"
 #include "rational.hpp"
 #include "util.hpp"
-#include "aug_matrix.hpp"
 #include "concepts.hpp"
 
 enum class FillType {
@@ -120,6 +118,9 @@ private:
 public:
     // Default constructor (std::variant compatibility)
     matrix() : row(0), col(0) {};
+
+    // Constructor to define the size
+    matrix(long r, long c) : row(r), col(c) {};
 
     // Filler constructor
     matrix(long, long, T, FillType = FillType::EVERY);

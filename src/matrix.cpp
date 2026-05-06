@@ -5,6 +5,7 @@ TODO list:
 */
 
 #include "matrix.hpp"
+#include "aug_matrix.hpp"
 #include <iostream>
 
 /*
