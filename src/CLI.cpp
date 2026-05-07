@@ -167,13 +167,13 @@ void print_var(std::string identifier, std::ostream& os) {
         auto etype = it->second->etype;
         std::visit([&](auto&& arg) {
             if (type == Variable::VarType::PRIMITIVE) {
-                os << identifier << type << etype << " =>" << arg << std::endl;
+                os << identifier << type << etype << " => " << arg << std::endl;
             } else {
                 os << identifier << type << etype << " =>\n" << arg << std::endl;
             }
         }, data);
     } else {
-        os << identifier << " => " << "[undefined]" << std::endl;
+        os << identifier << " => [undefined]" << std::endl;
     }
 }
 
@@ -220,6 +220,77 @@ void parse_command(std::string str) {
             print_var(str);
             std::cout << std::endl;
 
+        }
+    }
+}
+
+template <typename T>
+void evalUpdate(std::string str, T& store) {
+    if (__variables__.contains(str)) {
+        std::visit([&store](auto&& arg) {
+            store += arg;
+        }, __variables__[str]->self);
+    }
+}
+
+void eval(std::string str) {
+    str = trim(str);
+
+    size_t post_last_op = 0, i = 0;
+    std::vector<std::string> tkns;
+    Variable::ExactType prevalence = Variable::ExactType::NUMBER;
+
+    for (size_t i = 0; i < str.size() + 1; i++) {
+        if (i == str.size() || contains("+-*/", str[i])) {
+
+            // Validity check
+            std::string tkn = trim(str.substr(post_last_op, i - post_last_op + 1));
+            if (containsAny(tkn, "#%^&*[]:;\"'.,< >")) {
+                std::cout << "[DNE]";
+                return;
+            } else if (!isNumeric(tkn) && !__variables__.contains(tkn)) {
+                std::cout << "[DNE]";
+                return;
+            }
+
+            // Prevalent type check
+            if ((__variables__.contains(tkn)
+                && __variables__[tkn]->etype == Variable::ExactType::DECIMAL)
+                || isDecimal(str)) {
+                prevalence = Variable::ExactType::DECIMAL;
+            }
+
+            tkns.push_back(tkn);
+            tkns.push_back(std::to_string(str[i]));
+            post_last_op = i + 1;
+        }
+    }
+
+
+    switch (prevalence) {
+        case Variable::ExactType::DECIMAL: {
+            long accumulator = 0;
+            char oper = '+';
+
+            for (size_t i = 0; i < tkns.size(); i++) {
+                if (tkns.size() == 1 && contains("+-*/", tkns[i][0])) {
+                    oper = tkns[i][0];
+                }
+
+                switch (oper) {
+                    case '+':
+                        
+                        break;
+                    case '-':
+                        break;
+                }
+            }
+            break;
+        }
+
+        case Variable::ExactType::NUMBER: {
+            double accumulator = 0;
+            break;
         }
     }
 }

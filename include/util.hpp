@@ -156,6 +156,24 @@ inline bool containsAny(const std::string& haystack, const std::string& needles)
     return false;
 }
 
+inline bool isNumeric(const std::string& str) {
+    if (count(str, '.') > 1) return false;
+    for (const char c: str) {
+        if (c - '0' > 9 || c - '0' < 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+inline bool isDecimal(const std::string& str) {
+    return isNumeric(str) && count(str, '.') == 1;
+}
+
+inline bool isInteger(const std::string& str) {
+    return isNumeric(str) && count(str, '.') == 0;
+}
+
 // Colorful terminal
 #ifdef _WIN32
 #include <windows.h>

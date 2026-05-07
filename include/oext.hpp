@@ -11,7 +11,7 @@
 
 inline std::ostream& operator<<(std::ostream& os, const std::monostate& _) {
     (void)_;
-    return os << "<void>";
+    return os << "[void]";
 }
 
 inline std::ostream& operator<<(std::ostream& os, const Variable::VarType& type) {

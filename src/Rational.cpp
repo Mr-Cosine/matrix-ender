@@ -58,6 +58,8 @@ rational::rational(std::string descriptor, char delimiter) : rational(
 
 rational::rational(long num) : num(num), denom(1) {}
 
+rational::rational() : num(0), denom(1) {}
+
 rational rational::operator+(const rational& other) const {
     return rational(
         this->num * other.denom + other.num * this->denom,
@@ -69,6 +71,13 @@ rational rational::operator-(const rational& other) const {
     return rational(
         this->num * other.denom - other.num * this->denom,
         other.denom * this->denom
+    );
+}
+
+rational rational::operator-() const {
+    return rational(
+        -this->num,
+        this->denom
     );
 }
 
@@ -86,6 +95,14 @@ rational rational::operator/(const rational& other) const {
     );
 }
 
+bool rational::operator==(const rational& other) const {
+    return this->num == other.num && this->denom == other.denom;
+}
+
+bool rational::operator!=(const rational& other) const {
+    return this->num != other.num || this->denom != other.denom;
+}
+
 rational rational::inv() const {
     return rational(
         this->denom,
@@ -98,4 +115,8 @@ rational rational::neg() const {
         -this->num,
         this->denom
     );
+}
+
+double rational::toDouble() const {
+    return static_cast<double>(this->num) / static_cast<double>(this->denom);
 }

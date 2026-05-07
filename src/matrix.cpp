@@ -32,7 +32,60 @@ void print(Args... args) {
 inline std::ostream& operator<<(std::ostream& os, const rational& rational) {
     return os << rational.toString();
 }
+
+template <typename T>
+inline std::ostream& operator<<(std::ostream& os, const matrix<T>& mat) {
+    return os << mat.toString();
+}
+int main() {
+    
+    print("=== MATRIX MODULE DEBUG ===\n");
+
+    matrix<int> mymat(4, 4, 1, FillType::UPPER_TRI_R);
+    mymat.print();
+    matrix<rational> myratmat(4, 4, 2, FillType::LOWER_TRI);
+    myratmat.print();
+    matrix<int> strmat("1,2,3;4,5,6;7,8,9,;");
+    strmat.print();
+    cout << "printing matrix:\n" << strmat << endl;
+
+    matrix<int> a{
+        {1,2,3},
+        {4,5,6},
+        {7,8,9}
+    };
+    (a).print();
+
+    (a * matrix<int>{
+        {2,1,1},
+        {2,1,1},
+        {2,1,1}
+    }).print();
+
+    matrix<rational> t("[0,0;7/4,10/3]");
+    t.print();
+    t.ref().print();
+
+    return 0;
+}
 #endif
+
+template <Arithmetic T>
+matrix<T>::matrix(std::initializer_list<std::initializer_list<T>> list) {
+    this->row = list.size();
+    this->col = (*list.begin()).size();
+    this->data = std::vector<std::vector<T>>(this->row, std::vector<T>(this->col));
+
+    int i = 0;
+    for (const std::initializer_list<T>& row: list) {
+        int j = 0;
+        for (const T& entry: row) {
+            this->data[i][j] = entry;
+            j++;
+        }
+        i++;
+    }
+}
 
 template <Arithmetic T>
 matrix<T>::matrix(long row, long column, T filler, FillType fill_type)
@@ -94,6 +147,10 @@ void matrix<T>::print(char row_delimiter, char column_delimiter, bool tab, bool 
     std::cout << (pad ? "]\n" : "]") << std::endl;
 }
 
+template <Arithmetic T>
+matrix<T>::matrix(long row, long column)
+    : row(row), col(column), data(std::vector<std::vector<T>>(row, std::vector<T>(col, 0))) {};
+
 /*
 Definition moved to header for compatibility
 
@@ -114,27 +171,6 @@ Matrix<T>::Matrix(std::string descriptor, char row_delimiter, char column_delimi
     this->col = this->row > 0 ? this->data[0].size() : 0;
 }
 */
-
-#ifdef DEBUG_MATRIX
-template <typename T>
-inline std::ostream& operator<<(std::ostream& os, const matrix<T>& mat) {
-    return os << mat.toString();
-}
-int main() {
-    
-    print("=== MATRIX MODULE DEBUG ===\n");
-
-    matrix<int> mymat(4, 4, 1, FillType::UPPER_TRI_R);
-    mymat.print();
-    matrix<rational> myratmat(4, 4, 2, FillType::LOWER_TRI);
-    myratmat.print();
-    matrix<int> strmat("1,2,3;4,5,6;7,8,9,;");
-    strmat.print();
-    cout << "printing matrix:\n" << strmat << endl;
-
-    return 0;
-}
-#endif
 
 /*
 template <Arithmetic T>
@@ -280,8 +316,8 @@ std::string matrix<T>::toString(int loc, std::string dir) const {
 
 template <Arithmetic T>
 matrix<T> matrix<T>::operator+(const matrix<T>& other) const {
-    if (this->row != other.getRow() || this->col != other.getCol()) {
-        throw std::invalid_argument("Unmatched matrix size");
+    if (this->row != other.row || this->col != other.col) {
+        throw std::invalid_argument("operator+: Incompatible matrix shape.");
     }
     
     matrix<T> result(this->row, this->col);
@@ -296,7 +332,7 @@ matrix<T> matrix<T>::operator+(const matrix<T>& other) const {
 template <Arithmetic T>
 matrix<T> matrix<T>::operator-(const matrix<T>& other) const {
     if (this->row != other.getRow() || this->col != other.getCol()) {
-        throw std::invalid_argument("Unmatched matrix size");
+        throw std::invalid_argument("operator-: Incompatible shape.");
     }
     
     matrix<T> result(this->row, this->col);
@@ -310,13 +346,13 @@ matrix<T> matrix<T>::operator-(const matrix<T>& other) const {
 
 template <Arithmetic T>
 matrix<T> matrix<T>::operator*(const matrix<T>& other) const {
-    if (this->col != other.getRow()) {
-        throw std::invalid_argument("Matrix multiplication: columns must match rows");
+    if (this->col != other.row) {
+        throw std::invalid_argument("operator*: Incompatible shape.");
     }
     
-    matrix<T> result(this->row, other.getCol());
+    matrix<T> result(this->row, other.col);
     for (int i = 0; i < this->row; i++) {
-        for (int j = 0; j < other.getCol(); j++) {
+        for (int j = 0; j < other.col; j++) {
             T sum = T();
             for (int k = 0; k < this->col; k++) {
                 sum += data[i][k] * other.get(k, j);
@@ -346,7 +382,7 @@ matrix<U> operator*(U scalar, const matrix<U>& m) {
 template <Arithmetic T>
 matrix<T>& matrix<T>::operator+=(const matrix<T>& other) {
     if (this->row != other.getRow() || this->col != other.getCol()) {
-        throw std::invalid_argument("Unmatched matrix size");
+        throw std::invalid_argument("operator+=: Incompatible matrix shape.");
     }
     
     for (int i = 0; i < this->row; i++) {
@@ -360,7 +396,7 @@ matrix<T>& matrix<T>::operator+=(const matrix<T>& other) {
 template <Arithmetic T>
 matrix<T>& matrix<T>::operator-=(const matrix<T>& other) {
     if (this->row != other.getRow() || this->col != other.getCol()) {
-        throw std::invalid_argument("Unmatched matrix size");
+        throw std::invalid_argument("operator-: Incompatible matrix shape.");
     }
     
     for (int i = 0; i < this->row; i++) {
@@ -397,21 +433,21 @@ void matrix<T>::re(long r1, long r2) {
 }
 
 template <Arithmetic T>
-matrix<T> matrix<T>::ref(long termination) const {
+matrix<T> matrix<T>::ref(long stop_at) const {
     if (data.empty() || data[0].empty()) throw std::runtime_error("Matrix is empty");
 
     matrix<T> temp(*this);
     int lead = 0;
     int r = 0;
 
-     while (r < this->row && lead < termination) {
+     while (r < this->row && lead < stop_at) {
         int i = r;
         while (i < this->row && temp.get(i, lead) == T())
             i++;
 
         if (i < this->row) {
             if (i != r)
-                temp.rowSwap(r, i);
+                temp.re(r, i);
 
             T pivot = temp.get(r, lead);
 
@@ -435,15 +471,15 @@ template <Arithmetic T>
 matrix<T> matrix<T>::ref() const { return ref(this->col); }
 
 template <Arithmetic T>
-matrix<T> matrix<T>::rref(long termination) const {
+matrix<T> matrix<T>::rref(long stop_at) const {
     if (data.empty() || data[0].empty())
         throw std::runtime_error("Matrix is empty");
 
-    matrix<T> temp = this->echelonf(termination);
+    matrix<T> temp = this->ref(stop_at);
 
     for (int r = this->row - 1; r >= 0; --r) {
         int pivotCol = -1;
-        for (int c = 0; c < termination; ++c) {
+        for (int c = 0; c < stop_at; ++c) {
             if (temp.get(r, c) != T()) {
                 pivotCol = c;
                 break;
