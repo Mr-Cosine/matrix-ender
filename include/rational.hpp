@@ -94,6 +94,42 @@ public:
     rational operator/(const rational&) const;
 
     /**
+     * Not equal
+     *
+     * @param other Rational being compared
+     *
+     * @return Boolean
+     */
+    rational operator+=(const rational&) const;
+
+    /**
+     * Not equal
+     *
+     * @param other Rational being compared
+     *
+     * @return Boolean
+     */
+    rational operator-=(const rational&) const;
+
+    /**
+     * Not equal
+     *
+     * @param other Rational being compared
+     *
+     * @return Boolean
+     */
+    rational operator*=(const rational&) const;
+
+    /**
+     * Not equal
+     *
+     * @param other Rational being compared
+     *
+     * @return Boolean
+     */
+    rational operator/=(const rational&) const;
+
+    /**
      * Equal
      *
      * @param other Rational being compared

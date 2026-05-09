@@ -4,7 +4,6 @@ TODO list:
 */
 
 #include "matrix.hpp"
-#include "aug_matrix.hpp"
 
 /*
 #include <type_traits>
@@ -393,7 +392,7 @@ void matrix<T>::ro(long r1, long n1, long r2, long n2) {
     if (n1 == 0) throw IndexOutOfBoundException("n1 cannot be 0 for row operation r1 = n1r1 + n2r2");
     if (r1 >= this->row || r2 >= this->row ) throw IndexOutOfBoundException("r1 and/or r2 out of bound");
     for (int c = 0; c < this->col; c++) {
-        this->data[r1][c] = n1 * this->data[r1][c] + n2 * this->data[r2][c];
+        this->data[r1][c] = T(n1) * this->data[r1][c] + T(n2) * this->data[r2][c];
     }
 }
 
@@ -402,7 +401,7 @@ void matrix<T>::co(long c1, long n1, long c2, long n2) {
     if (n1 == 0) throw IndexOutOfBoundException("n1 cannot be 0 for column operation c1 = n1c1 + n2c2");
     if (c1 >= this->col || c2 >= this->col) throw IndexOutOfBoundException("c1 and/or c2 out of bound");
     for (int r = 0; r < this->row; r++) {
-        this->data[r][c1] = n1 * this->data[r][c1] + n2 * this->data[r][c2];
+        this->data[r][c1] = T(n1) * this->data[r][c1] + T(n2) * this->data[r][c2];
     }
 }
 
@@ -475,7 +474,7 @@ matrix<T> matrix<T>::rref(long stop_at) const {
         }
     }
 
-    return m;
+    return temp;
 }
 
 template <Arithmetic T>
