@@ -61,10 +61,9 @@ int main() {
         {2,1,1}
     }).print();
 
-    matrix<double> t("[34,24,236,11;0,91,12,55;0,3,77,26;0,68,9,81]");
+    matrix<rational> t("[0,0;7/4,10/3]");
     t.print();
-    t.rref().print();
-    print("Determinant:", t.det());
+    t.ref().print();
 
     return 0;
 }
@@ -154,6 +153,10 @@ void matrix<T>::print(char row_delimiter, char column_delimiter, bool tab, bool 
     std::cout << (pad ? "]\n" : "]") << std::endl;
 }
 
+template <Arithmetic T>
+matrix<T>::matrix(long row, long column)
+    : row(row), col(column), data(std::vector<std::vector<T>>(row, std::vector<T>(col, 0))) {};
+
 /*
 Definition moved to header for compatibility
 
@@ -175,6 +178,81 @@ Matrix<T>::Matrix(std::string descriptor, char row_delimiter, char column_delimi
 }
 */
 
+/*
+template <Arithmetic T>
+matrix<T>::matrix(int r, int c, std::string type) :
+    this->row(r), 
+    this->col(c),
+    data(r, std::vector<T>(c, T()))
+{
+    if (type == "identity") {
+        if (r != c) throw std::invalid_argument("Identity matrix have to be square");
+        for (int i = 0; i < this->row; i++) {
+            this->put(i, i, 1);
+        }
+    }
+    else if (type == "zero") {
+        for (int i = 0; i < r; i++) {
+            for (int j = 0; j < c; j++) this->put(i, j, T(0));
+        }
+    }
+    else if (type == "one") {
+        for (int i = 0; i < r; i++) {
+            for (int j = 0; j < c; j++) this->put(i, j, T(1));
+        }
+    }
+    else if (type == "upper_triangle") {
+        for (int i = 0; i < r; i++) {
+            for (int j = 0; j < c; j++) {
+                if (j >= i) this->put(i, j, T(1));
+                else this->put(i, j, T(0));
+            }
+        }
+    }
+    else if (type == "lower_triangle") {
+        for (int i = 0; i < r; i++) {
+            for (int j = 0; j < c; j++) {
+                if (j <= i) this->put(i, j, T(1));
+                else this->put(i, j, T(0));
+            }
+        }
+    }
+    else throw std::invalid_argument("Unknown matrix type, got: " + type);
+}
+*/
+
+/*
+template <Arithmetic T>
+matrix<T>::matrix(const matrix<T>& inputMatrix) : 
+    this->row(inputMatrix.getRow()), 
+    this->col(inputMatrix.getCol()),
+    data(this->row, std::vector<T>(this->col))
+{
+    for (int r = 0; r < this->row; r++) {
+        for (int c = 0; c < this->col; c++) {
+            data[r][c] = inputMatrix.get(r, c);
+        }
+    }
+}
+*/
+
+/*
+template <Arithmetic T>
+matrix<T>::matrix(const std::vector<std::vector<T>> inputVector) : 
+    this->row(static_cast<int>(inputVector.size())),
+    this->col(this->row > 0 ? static_cast<int>(inputVector[0].size()) : 0),
+    data(std::move(inputVector))
+{
+    for (const auto& row : inputVector) {
+        if (static_cast<int>(row.size()) != this->col) {
+            throw std::invalid_argument(
+                "All rows must have the same number of columns"
+            );
+        }
+    }
+}
+*/
+
 template <Arithmetic T>
 void matrix<T>::put(long r, long c, T value) {
     if (r >= this->row) throw IndexOutOfBoundException("Row index " + std::to_string(r) + " out of bounds");
@@ -193,8 +271,8 @@ T matrix<T>::get(long r, long c) const {
 
 template <Arithmetic T>
 matrix<T> matrix<T>::operator+(const matrix<T>& other) const {
-    if (this->row != other.getRow() || this->col != other.getCol()) {
-        throw InvalidArgumentException("Unmatched matrix size");
+    if (this->row != other.row || this->col != other.col) {
+        throw std::invalid_argument("operator+: Incompatible matrix shape.");
     }
 
     matrix<T> result(this->row, this->col);
@@ -209,7 +287,7 @@ matrix<T> matrix<T>::operator+(const matrix<T>& other) const {
 template <Arithmetic T>
 matrix<T> matrix<T>::operator-(const matrix<T>& other) const {
     if (this->row != other.getRow() || this->col != other.getCol()) {
-        throw InvalidArgumentException("Unmatched matrix size");
+        throw std::invalid_argument("operator-: Incompatible shape.");
     }
 
     matrix<T> result(this->row, this->col);
@@ -223,13 +301,13 @@ matrix<T> matrix<T>::operator-(const matrix<T>& other) const {
 
 template <Arithmetic T>
 matrix<T> matrix<T>::operator*(const matrix<T>& other) const {
-    if (this->col != other.getRow()) {
-        throw InvalidArgumentException("Matrix multiplication: columns must match rows");
+    if (this->col != other.row) {
+        throw std::invalid_argument("operator*: Incompatible shape.");
     }
-
-    matrix<T> result(this->row, other.getCol());
+    
+    matrix<T> result(this->row, other.col);
     for (int i = 0; i < this->row; i++) {
-        for (int j = 0; j < other.getCol(); j++) {
+        for (int j = 0; j < other.col; j++) {
             T sum = T();
             for (int k = 0; k < this->col; k++) {
                 sum += this->data[i][k] * other.get(k, j);
@@ -263,7 +341,7 @@ matrix<U> operator*(U scalar, const matrix<U>& m) {
 template <Arithmetic T>
 matrix<T>& matrix<T>::operator+=(const matrix<T>& other) {
     if (this->row != other.getRow() || this->col != other.getCol()) {
-        throw InvalidArgumentException("Unmatched matrix size");
+        throw std::invalid_argument("operator+=: Incompatible matrix shape.");
     }
 
     for (int i = 0; i < this->row; i++) {
@@ -277,7 +355,7 @@ matrix<T>& matrix<T>::operator+=(const matrix<T>& other) {
 template <Arithmetic T>
 matrix<T>& matrix<T>::operator-=(const matrix<T>& other) {
     if (this->row != other.getRow() || this->col != other.getCol()) {
-        throw InvalidArgumentException("Unmatched matrix size");
+        throw std::invalid_argument("operator-: Incompatible matrix shape.");
     }
 
     for (int i = 0; i < this->row; i++) {
@@ -382,27 +460,17 @@ matrix<T> matrix<T>::ref() const { return ref(this->col); }
 
 template <Arithmetic T>
 matrix<T> matrix<T>::rref(long stop_at) const {
-    matrix<T> m(*this);
+    if (data.empty() || data[0].empty())
+        throw std::runtime_error("Matrix is empty");
 
-    long constraint = min(this->col, this->row, stop_at);
-    for (long col = 0; col < constraint; col++) {
-        long row = col;
-        while (row < m.row && m.get(row, col) == T(0)) row++;
-        if (row == m.row) continue;
-        else if (row != col) m.re(col, row);
+    matrix<T> temp = this->ref(stop_at);
 
-        T pivot = m.get(col, col);
-        std::vector<T>& cr = m.data[col];
-        std::transform(cr.begin(), cr.end(), cr.begin(), [&](T entry) {
-            return entry / pivot;
-        });
-
-        for (int i = 0; i < this->row; i++) {
-            if (i == col) continue;
-
-            T coef = m.get(i, col);
-            for (int j = 0; j < this->col; j++) {
-                m.data[i][j] -= m.data[col][j] * coef;
+    for (int r = this->row - 1; r >= 0; --r) {
+        int pivotCol = -1;
+        for (int c = 0; c < stop_at; ++c) {
+            if (temp.get(r, c) != T()) {
+                pivotCol = c;
+                break;
             }
         }
     }

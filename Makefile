@@ -39,6 +39,7 @@ MAIN	:= main
 SOURCEDIRS	:= $(shell find $(SRC) -type d)
 INCLUDEDIRS	:= $(shell find $(INCLUDE) -type d)
 LIBDIRS		:= $(shell find $(LIB) -type d)
+OUTPUTDIRS	:= $(shell find $(OUTPUT) -type d)
 FIXPATH = $1
 RM = rm -f
 MD	:= mkdir -p
@@ -64,7 +65,7 @@ OBJECTS		:= $(SOURCES:.cpp=.o)
 DEPS		:= $(OBJECTS:.o=.d)
 
 # Matrix + Rational dependencies
-MRD := src/Matrix.cpp src/rational.cpp
+MRD := src/matrix.cpp src/rational.cpp
 
 #
 # The following part of the makefile is generic; it can be used to
@@ -91,8 +92,11 @@ $(MAIN): $(OBJECTS)
 # the rule(a .c file) and $@: the name of the target of the rule (a .o file)
 # -MMD generates dependency output files same name as the .o file
 # (see the gnu make manual section about automatic variables)
-.cpp.o:
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -MMD $<  -o $@
+%.o: src/%.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o output/$@
+
+aggreg: output/*.o
+	$(CXX) $(CXXFLAGS) $(INCLUDES) output/* -o main
 
 .PHONY: clean
 
@@ -109,7 +113,8 @@ test-matrix:
 
 tcli:
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -DDEBUG_CLI src/CLI.cpp $(MRD) -o tmp-exec/cli && tmp-exec/cli
-
+tloop:
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -DDEBUG_CLI_LOOP src/CLI.cpp $(MRD) -o tmp-exec/cli && tmp-exec/cli
 
 # Python testcases
 tcrat:
