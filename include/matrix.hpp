@@ -4,17 +4,16 @@
 
 #pragma once
 
+#include <iostream>
 #include <exception>
 #include <string>
 #include <vector>
 #include <sstream>
 #include <iomanip>
-#include <stdexcept>
-#include <algorithm>
 
-#include "rational.hpp"
 #include "util.hpp"
 #include "concepts.hpp"
+#include "rational.hpp"
 
 enum class FillType {
     UPPER_TRI,
@@ -38,6 +37,75 @@ struct Solution {
     SolutionType type;
 };
 
+// Matrix Exception Types
+class NotInvertibleMatrixException: public std::exception {
+private:
+    std::string message;
+
+public:
+    explicit NotInvertibleMatrixException(std::string message) : message(message) {}
+
+    const char* what() const noexcept override {
+        return this->message.c_str();
+    }
+};
+
+class InvalidFillTypeException: public std::exception {
+private:
+    std::string message;
+public:
+    explicit InvalidFillTypeException(std::string message) : message(message) {}
+
+    const char* what() const noexcept override {
+        return this->message.c_str();
+    }
+};
+
+class IndexOutOfBoundException: public std::exception {
+private:
+    std::string message;
+public:
+    explicit IndexOutOfBoundException(std::string message) : message(message) {}
+
+    const char* what() const noexcept override {
+        return this->message.c_str();
+    }
+};
+
+class MalformedMatrixException: public std::exception {
+private:
+    std::string message;
+public:
+    explicit MalformedMatrixException(std::string message) : message(message) {}
+
+    const char* what() const noexcept override {
+        return this->message.c_str();
+    }
+};
+
+class ComputationFailedException: public std::exception {
+private:
+    std::string message;
+public:
+    explicit ComputationFailedException(std::string message) : message(message) {}
+
+    const char* what() const noexcept override {
+        return this->message.c_str();
+    }
+};
+
+class InvalidArgumentException: public std::exception {
+private:
+    std::string message;
+public:
+    explicit InvalidArgumentException(std::string message) : message(message) {}
+
+    const char* what() const noexcept override {
+        return this->message.c_str();
+    }
+};
+
+// Matrix class
 template <Arithmetic T>
 class matrix {
 private:
@@ -46,81 +114,12 @@ private:
     std::vector<std::vector<T>> data;
     using Vector = std::vector<T>;
 
-    // Matrix Exception Types
-    class NotInvertibleMatrixException: public std::exception {
-    private:
-        std::string message;
-
-    public:
-        explicit NotInvertibleMatrixException(std::string message) : message(message) {}
-
-        const char* what() const noexcept override {
-            return this->message.c_str();
-        }
-    };
-
-    class InvalidFillTypeException: public std::exception {
-    private:
-        std::string message;
-    public:
-        explicit InvalidFillTypeException(std::string message) : message(message) {}
-
-        const char* what() const noexcept override {
-            return this->message.c_str();
-        }
-    };
-
-    class IndexOutOfBoundException: public std::exception {
-    private:
-        std::string message;
-    public:
-        explicit IndexOutOfBoundException(std::string message) : message(message) {}
-
-        const char* what() const noexcept override {
-            return this->message.c_str();
-        }
-    };
-
-    class MalformedMatrixException: public std::exception {
-    private:
-        std::string message;
-    public:
-        explicit MalformedMatrixException(std::string message) : message(message) {}
-
-        const char* what() const noexcept override {
-            return this->message.c_str();
-        }
-    };
-
-    class ComputationFailedException: public std::exception {
-    private:
-        std::string message;
-    public:
-        explicit ComputationFailedException(std::string message) : message(message) {}
-
-        const char* what() const noexcept override {
-            return this->message.c_str();
-        }
-    };
-
-    class InvalidMatricesPairException: public std::exception {
-    private:
-        std::string message;
-    public:
-        explicit InvalidMatricesPairException(std::string message) : message(message) {}
-
-        const char* what() const noexcept override {
-            return this->message.c_str();
-        }
-    };
-
-
 public:
     // Default constructor (std::variant compatibility)
     matrix() : row(0), col(0) {};
 
     // Constructor to define the size
-    matrix(long r, long c) : row(r), col(c) {};
+    matrix(long r, long c) : row(r), col(c) { data.resize(r, std::vector<T>(c)); };
 
     // Filler constructor
     matrix(long, long, T, FillType = FillType::EVERY);
@@ -147,13 +146,13 @@ public:
         std::istringstream iss(descriptor);
         std::string row_tkn;
         while (std::getline(iss, row_tkn, row_delimiter) && !row_tkn.empty()) {
-            std::vector<T> row;
+            std::vector<T> row_vec;
             std::istringstream row_iss(row_tkn);
             std::string tkn;
             while (std::getline(row_iss, tkn, column_delimiter) && !tkn.empty()) {
-                row.push_back(from_string<T>(tkn));
+                row_vec.push_back(from_string<T>(tkn));
             }
-            this->data.push_back(row);
+            this->data.push_back(row_vec);
         }
         this->row = this->data.size();
         this->col = this->row > 0 ? this->data[0].size() : 0;
@@ -161,30 +160,30 @@ public:
 
     // Insert value at [r,c] (in-place)
     void put(long, long, T);
-    
+
     // Retrieve value from [r,c]
     T get(long, long) const;
 
     // Stringnify the matrix
-    std::string toString(long row = -1, long column = -1, char row_delimiter = ';', char column_delimiter = ',', bool tab = true, bool line_break = true) const {
-        if (row > this->row || column > this->col) {
+    std::string toString(long r = -1, long c = -1, char row_delimiter = ';', char column_delimiter = ',', bool tab = true, bool line_break = true) const {
+        if (r > this->row || c > this->col) {
             throw IndexOutOfBoundException("Index out of bounds");
         }
 
-        row = row < 0 ? this->row : row;
-        column = column < 0 ? this->col : col;
+        r = r < 0 ? this->row : r;
+        c = c < 0 ? this->col : c;
         std::ostringstream oss;
         oss << "[";
-        for (int i = 0; i < row; i++) {
-            for (int j = 0; j < this->col; j++) {
+        for (int i = 0; i < r; i++) {
+            for (int j = 0; j < c; j++) {
                 if (i != 0 && j == 0) oss << " ";
                 oss << this->data[i][j];
-                if (j != this->col - 1) {
+                if (j != c - 1) {
                     oss << column_delimiter;
                     if (tab) oss << "\t";
                 }
             }
-            if (i != row - 1) {
+            if (i != r - 1) {
                 oss << row_delimiter;
                 if (line_break) oss << "\n";
             }
@@ -192,9 +191,11 @@ public:
         oss << "]" << std::endl;
         return oss.str();
     }
-    
+
     // Print the matrix
     void print(char = '\n', char = ',', bool = true, bool = true) const;
+
+    void display() const;
 
     // Matrix arithmetics (symbolic)
 
@@ -258,19 +259,19 @@ public:
 
     // Get eigenvectors
     //std::vector<Vector> eigenvec() const;
-    
+
     // Diagnoize the matrix (didn't make)
     //matrix<T> diagonize() const;
 
     // LU Factorization (didn't make)
-    //matrix<T> LU() const; 
+    //matrix<T> LU() const;
 
     // Matrix properties
 
     // Get rank of matrix
     long rank() const;
 
-    // Get nullity of matrix                                              
+    // Get nullity of matrix
     long nullity() const;
 
     long getRow() const { return this->row; }

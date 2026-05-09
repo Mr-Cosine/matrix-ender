@@ -1,8 +1,11 @@
 #pragma once
 
-#include <iostream>
-#include <string>
 #include <vector>
+#include <iostream>
+#include <vector>
+#include <string>
+#include <iomanip>
+#include <sstream>
 
 #include "concepts.hpp"
 #include "matrix.hpp"
@@ -15,15 +18,12 @@ class augmented_matrix {
         matrix<T> left;
         matrix<T> right;
 
-        // Custom exception type here
-        // class MyException: public std::exception;
-
+    public:
         enum class Side {
             LEFT,
             RIGHT
         };
 
-    public:
         // Added zero constructor for compatibility
         augmented_matrix(): left(), right() {};
 

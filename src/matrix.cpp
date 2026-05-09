@@ -6,7 +6,6 @@ TODO list:
 
 #include "matrix.hpp"
 #include "aug_matrix.hpp"
-#include <iostream>
 
 /*
 #include <type_traits>
@@ -50,7 +49,7 @@ matrix<T>::matrix(long row, long column, T filler, FillType fill_type)
                     }
                 }
                 break;
-            
+
             case FillType::UPPER_TRI_R:
                 for (int i = 0; i < column; i++) {
                     for (int j = 0; j < row - i; j++) {
@@ -66,7 +65,7 @@ matrix<T>::matrix(long row, long column, T filler, FillType fill_type)
                     }
                 }
                 break;
-            
+
             case FillType::LOWER_TRI_R:
                 for (int i = 0; i < column; i++) {
                     for (int j = 0; j <= i; j++) {
@@ -74,7 +73,7 @@ matrix<T>::matrix(long row, long column, T filler, FillType fill_type)
                     }
                 }
                 break;
-            
+
             case FillType::DIAGONAL:
                 if (row != col) throw MalformedMatrixException("Non-square diagonal matrix detected");
                 for (int i = 0; i < col; i++) {
@@ -129,7 +128,7 @@ inline std::ostream& operator<<(std::ostream& os, const matrix<T>& mat) {
     return os << mat.toString();
 }
 int main() {
-    
+
     print("=== MATRIX MODULE DEBUG ===\n");
 
     matrix<int> mymat(4, 4, 1, FillType::UPPER_TRI_R);
@@ -150,73 +149,35 @@ void matrix<T>::put(long r, long c, T value) {
     if (c >= this->col) throw IndexOutOfBoundException("Column index " + std::to_string(c) + " out of bounds");
 
     this->data[r][c] = value;
-    return;
 }
 
 template <Arithmetic T>
 T matrix<T>::get(long r, long c) const {
     if (r >= this->row) throw IndexOutOfBoundException("Row index " + std::to_string(r) + " out of bounds");
     if (c >= this->col) throw IndexOutOfBoundException("Column index " + std::to_string(c) + " out of bounds");
-    
+
     return this->data[r][c];
 }
 
-/*
 template <Arithmetic T>
 void matrix<T>::display() const {
-    if (data.empty() || data[0].empty()) { throw std::runtime_error("Matrix is empty"); }
+    if (data.empty() || data[0].empty()) { throw InvalidArgumentException("Matrix is empty"); }
 
-    for (const auto& row : data) {
+    for (const auto& matrixRow : data) {
         std::cout << '[';
-        for (const auto& entry : row) {
+        for (const auto& entry : matrixRow) {
             std::cout << std::setw(8) << entry;
         }
-        std::cout << std::setw(8) << ']\n';
+        std::cout << std::setw(8) << ']' << std::endl;
     }
-
-    return;
-};
-*/
-
-/*
-template <Arithmetic T>
-std::string matrix<T>::toString(int loc, std::string dir) const {
-    if (data.empty() || data[0].empty()) { throw std::runtime_error("Matrix is empty"); }
-
-    std::ostringstream output;
-
-    if (dir == "row") {
-        if (loc > this->row) throw std::out_of_range("Row index " + std::to_string(loc) + " out of bounds");
-
-        output << "[";
-        for (int c = 0; c < this->col; c++) {
-            output << std::setw(8) << data[loc - 1][c];
-        }
-        output << std::setw(8) << "]";
-
-        return output.str();
-    }
-    else if (dir == "column") {
-        if (loc > this->col) throw std::out_of_range("Column index " + std::to_string(loc) + " out of bounds");
-        
-        output << "[";
-        for (int r = 0; r < this->row; r++) {
-            output << std::setw(8) << data[r][loc - 1];
-        }
-        output << std::setw(8) << "]";
-
-        return output.str();
-    }
-    else throw std::invalid_argument("Direction must be 'row' or 'column', got: " + dir);
 }
-*/
 
 template <Arithmetic T>
 matrix<T> matrix<T>::operator+(const matrix<T>& other) const {
     if (this->row != other.getRow() || this->col != other.getCol()) {
-        throw InvalidMatricesPairException("Unmatched matrix size");
+        throw InvalidArgumentException("Unmatched matrix size");
     }
-    
+
     matrix<T> result(this->row, this->col);
     for (int i = 0; i < this->row; i++) {
         for (int j = 0; j < this->col; j++) {
@@ -229,9 +190,9 @@ matrix<T> matrix<T>::operator+(const matrix<T>& other) const {
 template <Arithmetic T>
 matrix<T> matrix<T>::operator-(const matrix<T>& other) const {
     if (this->row != other.getRow() || this->col != other.getCol()) {
-        throw InvalidMatricesPairException("Unmatched matrix size");
+        throw InvalidArgumentException("Unmatched matrix size");
     }
-    
+
     matrix<T> result(this->row, this->col);
     for (int i = 0; i < this->row; i++) {
         for (int j = 0; j < this->col; j++) {
@@ -244,9 +205,9 @@ matrix<T> matrix<T>::operator-(const matrix<T>& other) const {
 template <Arithmetic T>
 matrix<T> matrix<T>::operator*(const matrix<T>& other) const {
     if (this->col != other.getRow()) {
-        throw InvalidMatricesPairException("Matrix multiplication: columns must match rows");
+        throw InvalidArgumentException("Matrix multiplication: columns must match rows");
     }
-    
+
     matrix<T> result(this->row, other.getCol());
     for (int i = 0; i < this->row; i++) {
         for (int j = 0; j < other.getCol(); j++) {
@@ -270,6 +231,10 @@ matrix<T> matrix<T>::operator*(const T scalar) const {
     }
     return result;
 }
+template <Arithmetic T>
+matrix<T> matrix<T>::operator/(const matrix<T>& other) const {
+    return *this * other.inverse();
+}
 
 template <Arithmetic U>
 matrix<U> operator*(U scalar, const matrix<U>& m) {
@@ -279,9 +244,9 @@ matrix<U> operator*(U scalar, const matrix<U>& m) {
 template <Arithmetic T>
 matrix<T>& matrix<T>::operator+=(const matrix<T>& other) {
     if (this->row != other.getRow() || this->col != other.getCol()) {
-        throw InvalidMatricesPairException("Unmatched matrix size");
+        throw InvalidArgumentException("Unmatched matrix size");
     }
-    
+
     for (int i = 0; i < this->row; i++) {
         for (int j = 0; j < this->col; j++) {
             this->data[i][j] += other.get(i, j);
@@ -293,9 +258,9 @@ matrix<T>& matrix<T>::operator+=(const matrix<T>& other) {
 template <Arithmetic T>
 matrix<T>& matrix<T>::operator-=(const matrix<T>& other) {
     if (this->row != other.getRow() || this->col != other.getCol()) {
-        throw InvalidMatricesPairException("Unmatched matrix size");
+        throw InvalidArgumentException("Unmatched matrix size");
     }
-    
+
     for (int i = 0; i < this->row; i++) {
         for (int j = 0; j < this->col; j++) {
             this->data[i][j] -= other.get(i, j);
@@ -315,16 +280,16 @@ matrix<T>& matrix<T>::operator*=(T scalar) {
 }
 
 template <Arithmetic T>
-matrix<T> matrix<T>::add(const matrix<T>& inputMatrix) const { return this + inputMatrix; }
+matrix<T> matrix<T>::add(const matrix<T>& inputMatrix) const { return *this + inputMatrix; }
 
 template <Arithmetic T>
-matrix<T> matrix<T>::sub(const matrix<T>& inputMatrix) const { return this - inputMatrix; }
+matrix<T> matrix<T>::sub(const matrix<T>& inputMatrix) const { return *this - inputMatrix; }
 
 template <Arithmetic T>
-matrix<T> matrix<T>::mult(const matrix<T>& inputMatrix) const { return this * inputMatrix; }
+matrix<T> matrix<T>::mult(const matrix<T>& inputMatrix) const { return *this * inputMatrix; }
 
 template <Arithmetic T>
-matrix<T> matrix<T>::div(const matrix<T>& inputMatrix) const { return this * inputMatrix.inverse(); }
+matrix<T> matrix<T>::div(const matrix<T>& inputMatrix) const { return *this * inputMatrix.inverse(); }
 
 template <Arithmetic T>
 void matrix<T>::ro(long r1, long n1, long r2, long n2) {
@@ -353,7 +318,7 @@ void matrix<T>::re(long r1, long r2) {
 
 template <Arithmetic T>
 void matrix<T>::ce(long c1, long c2) {
-    if (c1 >= this->col || c2 >= this->col) IndexOutOfBoundException("c1 and/or c2 out of bound");
+    if (c1 >= this->col || c2 >= this->col) throw IndexOutOfBoundException("c1 and/or c2 out of bound");
 
     std::swap(this->data[c1], this->data[c2]);
 }
@@ -436,23 +401,25 @@ matrix<T> matrix<T>::rref() const { return rref(this->col); }
 template <Arithmetic T>
 bool matrix<T>::inspan(Vector vector) const {
     matrix<T> rightside(vector);
-    augmented_matrix<T> augmented(this, rightside);
-    Solution<T> sol;
+    augmented_matrix<T> augmented(*this, rightside);
 
-    try { sol.vector_group = augmented.solve(); }
-    catch (std::runtime_error) { return false; }
 
+    try {
+        Solution<T> sol;
+        sol.vector_group = augmented.solve();
+    }
+    catch (const ComputationFailedException&) { return false; }
     return true;
 }
 
 template <Arithmetic T>
 Solution<T> matrix<T>::solve(Vector vector) const {
     matrix<T> rightside(vector);
-    augmented_matrix<T> augmented(this, rightside);
+    augmented_matrix<T> augmented(*this, rightside);
     Solution<T> sol;
 
     try { sol.vector_group = augmented.solve(); }
-    catch (std::runtime_error) { sol.type = Solution<T>::SolutionType::NIL; return sol;}
+    catch (const ComputationFailedException&) { sol.type = Solution<T>::SolutionType::NIL; return sol;}
 
     if (sol.vector_group.size() > 1) {
         sol.type = Solution<T>::SolutionType::INFINITE;
@@ -481,7 +448,7 @@ T matrix<T>::det() const {
                 subMatrix.put(i - 1, subCol, data[i][j]);
             }
         }
-        
+
         det = (c % 2 != 0)? det - data[0][c] * subMatrix.det(): det + data[0][c] * subMatrix.det();
     }
 
@@ -519,7 +486,7 @@ TODO: Reimplement
 template <Arithmetic T>
 std::vector<std::complex<double>> matrix<T>::eigenval() const {
     if (this->row != this->col) throw std::invalid_argument("Eigenvalue not defined for non-square matrix");
-    
+
     Eigen::MatrixXd A(this->row, this->col);
     for (int i = 0; i < this->row; i++)
         for (int j = 0; j < this->col; j++)
@@ -583,3 +550,7 @@ template <Arithmetic T>
 std::vector<long> matrix<T>::dim() const {
     return std::vector<long>(row, col);
 }
+
+template class matrix<int>;
+template class matrix<double>;
+template class matrix<rational>;
