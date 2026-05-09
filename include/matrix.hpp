@@ -135,6 +135,8 @@ public:
         }
     }
 
+    matrix<T>::matrix(std::initializer_list<std::initializer_list<T>>);
+
     // String constructor
     matrix(std::string descriptor, char row_delimiter = ';', char column_delimiter = ',')  {
         if (descriptor.find('[') != std::string::npos && descriptor.find(']') != std::string::npos) {

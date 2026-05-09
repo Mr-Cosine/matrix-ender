@@ -1,7 +1,6 @@
 /*
 TODO list:
     1. Implement dynamic typing used in calculation
-    2. Compile and debug
 */
 
 #include "matrix.hpp"
@@ -32,7 +31,61 @@ void print(Args... args) {
 inline std::ostream& operator<<(std::ostream& os, const rational& rational) {
     return os << rational.toString();
 }
+
+template <typename T>
+inline std::ostream& operator<<(std::ostream& os, const matrix<T>& mat) {
+    return os << mat.toString();
+}
+int main() {
+    
+    print("=== MATRIX MODULE DEBUG ===\n");
+
+    matrix<int> mymat(4, 4, 1, FillType::UPPER_TRI_R);
+    mymat.print();
+    matrix<rational> myratmat(4, 4, 2, FillType::LOWER_TRI);
+    myratmat.print();
+    matrix<int> strmat("1,2,3;4,5,6;7,8,9,;");
+    strmat.print();
+    cout << "printing matrix:\n" << strmat << endl;
+
+    matrix<int> a{
+        {1,2,3},
+        {4,5,6},
+        {7,8,9}
+    };
+    (a).print();
+
+    (a * matrix<int>{
+        {2,1,1},
+        {2,1,1},
+        {2,1,1}
+    }).print();
+
+    matrix<double> t("[34,24,236,11;0,91,12,55;0,3,77,26;0,68,9,81]");
+    t.print();
+    t.rref().print();
+    print("Determinant:", t.det());
+
+    return 0;
+}
 #endif
+
+template <Arithmetic T>
+matrix<T>::matrix(std::initializer_list<std::initializer_list<T>> list) {
+    this->row = list.size();
+    this->col = (*list.begin()).size();
+    this->data = std::vector<std::vector<T>>(this->row, std::vector<T>(this->col));
+
+    int i = 0;
+    for (const std::initializer_list<T>& row: list) {
+        int j = 0;
+        for (const T& entry: row) {
+            this->data[i][j] = entry;
+            j++;
+        }
+        i++;
+    }
+}
 
 template <Arithmetic T>
 matrix<T>::matrix(long row, long column, T filler, FillType fill_type)
@@ -121,27 +174,6 @@ Matrix<T>::Matrix(std::string descriptor, char row_delimiter, char column_delimi
     this->col = this->row > 0 ? this->data[0].size() : 0;
 }
 */
-
-#ifdef DEBUG_MATRIX
-template <typename T>
-inline std::ostream& operator<<(std::ostream& os, const matrix<T>& mat) {
-    return os << mat.toString();
-}
-int main() {
-
-    print("=== MATRIX MODULE DEBUG ===\n");
-
-    matrix<int> mymat(4, 4, 1, FillType::UPPER_TRI_R);
-    mymat.print();
-    matrix<rational> myratmat(4, 4, 2, FillType::LOWER_TRI);
-    myratmat.print();
-    matrix<int> strmat("1,2,3;4,5,6;7,8,9,;");
-    strmat.print();
-    cout << "printing matrix:\n" << strmat << endl;
-
-    return 0;
-}
-#endif
 
 template <Arithmetic T>
 void matrix<T>::put(long r, long c, T value) {
