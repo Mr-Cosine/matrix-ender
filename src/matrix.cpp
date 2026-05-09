@@ -160,19 +160,6 @@ T matrix<T>::get(long r, long c) const {
 }
 
 template <Arithmetic T>
-void matrix<T>::display() const {
-    if (data.empty() || data[0].empty()) { throw InvalidArgumentException("Matrix is empty"); }
-
-    for (const auto& matrixRow : data) {
-        std::cout << '[';
-        for (const auto& entry : matrixRow) {
-            std::cout << std::setw(8) << entry;
-        }
-        std::cout << std::setw(8) << ']' << std::endl;
-    }
-}
-
-template <Arithmetic T>
 matrix<T> matrix<T>::operator+(const matrix<T>& other) const {
     if (this->row != other.getRow() || this->col != other.getCol()) {
         throw InvalidArgumentException("Unmatched matrix size");
@@ -324,14 +311,14 @@ void matrix<T>::ce(long c1, long c2) {
 }
 
 template <Arithmetic T>
-matrix<T> matrix<T>::ref(long termination) const {
-    if (this->data.empty() || this->data[0].empty()) throw MalformedMatrixException("Matrix is empty");
+matrix<T> matrix<T>::ref(long stop_at) const {
+    if (data.empty() || data[0].empty()) throw std::runtime_error("Matrix is empty");
 
     matrix<T> temp(*this);
     int lead = 0;
     int r = 0;
 
-     while (r < this->row && lead < termination) {
+     while (r < this->row && lead < stop_at) {
         int i = r;
         while (i < this->row && temp.get(i, lead) == T())
             i++;
@@ -362,36 +349,33 @@ template <Arithmetic T>
 matrix<T> matrix<T>::ref() const { return ref(this->col); }
 
 template <Arithmetic T>
-matrix<T> matrix<T>::rref(long termination) const {
-    if (this->data.empty() || this->data[0].empty())
-        throw MalformedMatrixException("Matrix is empty");
+matrix<T> matrix<T>::rref(long stop_at) const {
+    matrix<T> m(*this);
 
-    matrix<T> temp = this->ref(termination);
+    long constraint = min(this->col, this->row, stop_at);
+    for (long col = 0; col < constraint; col++) {
+        long row = col;
+        while (row < m.row && m.get(row, col) == T(0)) row++;
+        if (row == m.row) continue;
+        else if (row != col) m.re(col, row);
 
-    for (int r = this->row - 1; r >= 0; --r) {
-        int pivotCol = -1;
-        for (int c = 0; c < termination; ++c) {
-            if (temp.get(r, c) != T()) {
-                pivotCol = c;
-                break;
-            }
-        }
+        T pivot = m.get(col, col);
+        std::vector<T>& cr = m.data[col];
+        std::transform(cr.begin(), cr.end(), cr.begin(), [&](T entry) {
+            return entry / pivot;
+        });
 
-        if (pivotCol == -1) continue;
+        for (int i = 0; i < this->row; i++) {
+            if (i == col) continue;
 
-        T pivot = temp.get(r, pivotCol);
-        for (int c = pivotCol; c < this->col; ++c)
-            temp.put(r, c, temp.get(r, c)/pivot);
-
-        for (int i = r - 1; i >= 0; --i) {
-            T factor = temp.get(i, pivotCol);
-            if (factor != T()) {
-                for (int c = pivotCol; c < this->col; ++c)
-                    temp.put(i, c, temp.get(i, c) - factor*temp.get(r, c));
+            T coef = m.get(i, col);
+            for (int j = 0; j < this->col; j++) {
+                m.data[i][j] -= m.data[col][j] * coef;
             }
         }
     }
-    return temp;
+
+    return m;
 }
 
 template <Arithmetic T>
@@ -434,22 +418,14 @@ template <Arithmetic T>
 T matrix<T>::det() const {
     if (this->row != this->col) throw MalformedMatrixException("Non-square matrix");
 
+    if (this->row == 0 || this->col == 0) return 0;
     if (this->row == 1) return data[0][0];
     if (this->row == 2) return data[0][0] * data[1][1] - data[0][1] * data[1][0];
 
-    T det = 0;
-    for (int c = 0; c < this->col; c++) {
-        matrix<T> subMatrix(this->row - 1, this->col - 1);
-
-        for (int i = 1; i < this->row; i++) {
-            for (int j = 0; j < this->col; j++) {
-                if (j == c) continue;
-                int subCol = (j < c) ? j : j - 1;
-                subMatrix.put(i - 1, subCol, data[i][j]);
-            }
-        }
-
-        det = (c % 2 != 0)? det - data[0][c] * subMatrix.det(): det + data[0][c] * subMatrix.det();
+    T det(1);
+    matrix<T> m(this->ref());
+    for (long i = 0; i < m.row; i++) {
+        det *= m.get(i, i);
     }
 
     return det;

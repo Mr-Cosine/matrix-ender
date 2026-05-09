@@ -195,8 +195,6 @@ public:
     // Print the matrix
     void print(char = '\n', char = ',', bool = true, bool = true) const;
 
-    void display() const;
-
     // Matrix arithmetics (symbolic)
 
     matrix<T> operator+(const matrix<T>&) const;
