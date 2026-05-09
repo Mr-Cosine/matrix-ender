@@ -3,14 +3,17 @@
  */
 
 #pragma once
-#include "rational.hpp"
 #include "initializer_list"
 #include <iostream>
+#include <concepts>
+#include <rational.hpp>
+#include <vector>
 #include <string>
 
 /**
  * Parse to number type from string
  */
+
 
 template <typename T>
 T from_string(std::string);
@@ -172,6 +175,52 @@ inline bool isDecimal(const std::string& str) {
 
 inline bool isInteger(const std::string& str) {
     return isNumeric(str) && count(str, '.') == 0;
+}
+
+template <typename T, typename... Args>
+requires ((std::is_integral_v<Args> || std::is_floating_point_v<Args>) && ...)
+inline constexpr auto min(T first, Args... args) {
+    T result = first;
+    ((result = result < args ? result : args), ...);
+    return result;
+}
+
+template <Ordered T>
+inline constexpr bool is_zero(T a);
+
+template <>
+inline constexpr bool is_zero<char>(char c) {
+    return c == 0;
+}
+
+template <>
+inline constexpr bool is_zero<short>(short v) {
+    return v == 0;
+}
+
+template <>
+inline constexpr bool is_zero<int>(int v) {
+    return v == 0;
+}
+
+template <>
+inline constexpr bool is_zero<long>(long v) {
+    return v == 0;
+}
+
+template <>
+inline constexpr bool is_zero<float>(float v) {
+    return std::abs(v) < 1e-6;
+}
+
+template <>
+inline constexpr bool is_zero<double>(double v) {
+    return std::abs(v) < 1e-6;
+}
+
+template <>
+inline bool is_zero<rational>(rational r) {
+    return r.num == 0;
 }
 
 // Colorful terminal

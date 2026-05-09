@@ -279,7 +279,6 @@ void eval(std::string str) {
 
                 switch (oper) {
                     case '+':
-                        
                         break;
                     case '-':
                         break;

@@ -6,6 +6,7 @@ TODO list:
 
 #include "matrix.hpp"
 #include <iostream>
+#include "util.hpp"
 
 /*
 #include <type_traits>
@@ -62,9 +63,10 @@ int main() {
         {2,1,1}
     }).print();
 
-    matrix<rational> t("[0,0;7/4,10/3]");
+    matrix<double> t("[34,24,236,11;0,0,12,55;0,0,0,26;0,0,0,0]");
     t.print();
-    t.ref().print();
+    t.rref().print();
+    print("Determinant:", t.det());
 
     return 0;
 }
@@ -442,7 +444,7 @@ matrix<T> matrix<T>::ref(long stop_at) const {
 
      while (r < this->row && lead < stop_at) {
         int i = r;
-        while (i < this->row && temp.get(i, lead) == T())
+        while (i < this->row && is_zero<T>(temp.get(i, lead)))
             i++;
 
         if (i < this->row) {
@@ -470,6 +472,39 @@ matrix<T> matrix<T>::ref(long stop_at) const {
 template <Arithmetic T>
 matrix<T> matrix<T>::ref() const { return ref(this->col); }
 
+template <Arithmetic T>
+matrix<T> matrix<T>::rref(long stop_at) const {
+    matrix<T> m(*this);
+
+    long constraint = min(this->col, this->row, stop_at);
+    long pivrow = 0;
+    for (long col = 0; col < constraint; col++) {
+        long row = pivrow;
+        while (row < m.row && m.get(row, col) == T(0)) row++;
+        if (row == m.row) continue;
+        else if (row != pivrow) m.re(pivrow, row);
+
+        T pivot = m.get(pivrow, col);
+        std::vector<T>& cr = m.data[pivrow];
+        std::transform(cr.begin(), cr.end(), cr.begin(), [&](T entry) {
+            return entry / pivot;
+        });
+
+        for (long i = 0; i < m.row; i++) {
+            if (i == pivrow) continue;
+
+            T coef = m.get(i, col);
+            for (long j = 0; j < m.col; j++) {
+                m.data[i][j] -= m.data[pivrow][j] * coef;
+            }
+        }
+        pivrow++;
+    }
+
+    return m;
+}
+
+/*
 template <Arithmetic T>
 matrix<T> matrix<T>::rref(long stop_at) const {
     if (data.empty() || data[0].empty())
@@ -502,13 +537,14 @@ matrix<T> matrix<T>::rref(long stop_at) const {
     }
     return temp;
 }
+    */
 
 template <Arithmetic T>
 matrix<T> matrix<T>::rref() const { return rref(this->col); }
 
-
+/*
 template <Arithmetic T>
-T matrix<T>::det() const {
+T matrix<T>::detalt() const {
     if (this->row != this->col) throw std::invalid_argument("Non-square matrix");
 
     if (this->row == 1) return data[0][0];
@@ -526,10 +562,25 @@ T matrix<T>::det() const {
             }
         }
         
-        det = (c % 2 != 0)? det - data[0][c] * subMatrix.determinant(): det + data[0][c] * subMatrix.determinant();
+        det = (c % 2 != 0)? det - data[0][c] * subMatrix.det(): det + data[0][c] * subMatrix.det();
     }
 
     return det;
+}
+*/
+
+
+template <Arithmetic T>
+T matrix<T>::det() const {
+    if (this->row == 0 || this->col == 0) return 0;
+    if (this->row != this->col) throw std::invalid_argument("Non-square matrix");
+
+    matrix<T> m(this->ref());
+    T val(1);
+    for (long i = 0; i < m.row; i++) {
+        val *= m.get(i, i);
+    }
+    return val;
 }
 
 template <Arithmetic T>
