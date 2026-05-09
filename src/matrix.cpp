@@ -1,11 +1,10 @@
 /*
 TODO list:
     1. Implement dynamic typing used in calculation
-    2. Compile and debug
 */
 
 #include "matrix.hpp"
-#include <iostream>
+#include "aug_matrix.hpp"
 
 /*
 #include <type_traits>
@@ -102,7 +101,7 @@ matrix<T>::matrix(long row, long column, T filler, FillType fill_type)
                     }
                 }
                 break;
-            
+
             case FillType::UPPER_TRI_R:
                 for (int i = 0; i < column; i++) {
                     for (int j = 0; j < row - i; j++) {
@@ -118,12 +117,19 @@ matrix<T>::matrix(long row, long column, T filler, FillType fill_type)
                     }
                 }
                 break;
-            
+
             case FillType::LOWER_TRI_R:
                 for (int i = 0; i < column; i++) {
                     for (int j = 0; j <= i; j++) {
                         this->data[row - 1 - j][i] = filler;
                     }
+                }
+                break;
+
+            case FillType::DIAGONAL:
+                if (row != col) throw MalformedMatrixException("Non-square diagonal matrix detected");
+                for (int i = 0; i < col; i++) {
+                    this->data[i][i] = filler;
                 }
                 break;
 
@@ -249,81 +255,30 @@ matrix<T>::matrix(const std::vector<std::vector<T>> inputVector) :
 
 template <Arithmetic T>
 void matrix<T>::put(long r, long c, T value) {
-    if (r >= this->row) throw std::out_of_range("Row index " + std::to_string(r) + " out of bounds");
-    if (c >= this->col) throw std::out_of_range("Column index " + std::to_string(c) + " out of bounds");
+    if (r >= this->row) throw IndexOutOfBoundException("Row index " + std::to_string(r) + " out of bounds");
+    if (c >= this->col) throw IndexOutOfBoundException("Column index " + std::to_string(c) + " out of bounds");
 
-    data[r][c] = value;
-    return;
+    this->data[r][c] = value;
 }
 
 template <Arithmetic T>
 T matrix<T>::get(long r, long c) const {
-    if (r >= this->row) throw std::out_of_range("Row index " + std::to_string(r) + " out of bounds");
-    if (c >= this->col) throw std::out_of_range("Column index " + std::to_string(c) + " out of bounds");
-    
-    return data[r][c];
+    if (r >= this->row) throw IndexOutOfBoundException("Row index " + std::to_string(r) + " out of bounds");
+    if (c >= this->col) throw IndexOutOfBoundException("Column index " + std::to_string(c) + " out of bounds");
+
+    return this->data[r][c];
 }
-
-/*
-template <Arithmetic T>
-void matrix<T>::display() const {
-    if (data.empty() || data[0].empty()) { throw std::runtime_error("Matrix is empty"); }
-
-    for (const auto& row : data) {
-        std::cout << '[';
-        for (const auto& entry : row) {
-            std::cout << std::setw(8) << entry;
-        }
-        std::cout << std::setw(8) << ']\n';
-    }
-
-    return;
-};
-*/
-
-/*
-template <Arithmetic T>
-std::string matrix<T>::toString(int loc, std::string dir) const {
-    if (data.empty() || data[0].empty()) { throw std::runtime_error("Matrix is empty"); }
-
-    std::ostringstream output;
-
-    if (dir == "row") {
-        if (loc > this->row) throw std::out_of_range("Row index " + std::to_string(loc) + " out of bounds");
-
-        output << "[";
-        for (int c = 0; c < this->col; c++) {
-            output << std::setw(8) << data[loc - 1][c];
-        }
-        output << std::setw(8) << "]";
-
-        return output.str();
-    }
-    else if (dir == "column") {
-        if (loc > this->col) throw std::out_of_range("Column index " + std::to_string(loc) + " out of bounds");
-        
-        output << "[";
-        for (int r = 0; r < this->row; r++) {
-            output << std::setw(8) << data[r][loc - 1];
-        }
-        output << std::setw(8) << "]";
-
-        return output.str();
-    }
-    else throw std::invalid_argument("Direction must be 'row' or 'column', got: " + dir);
-}
-*/
 
 template <Arithmetic T>
 matrix<T> matrix<T>::operator+(const matrix<T>& other) const {
     if (this->row != other.row || this->col != other.col) {
         throw std::invalid_argument("operator+: Incompatible matrix shape.");
     }
-    
+
     matrix<T> result(this->row, this->col);
     for (int i = 0; i < this->row; i++) {
         for (int j = 0; j < this->col; j++) {
-            result.put(i, j, data[i][j] + other.get(i, j));
+            result.put(i, j, this->data[i][j] + other.get(i, j));
         }
     }
     return result;
@@ -334,11 +289,11 @@ matrix<T> matrix<T>::operator-(const matrix<T>& other) const {
     if (this->row != other.getRow() || this->col != other.getCol()) {
         throw std::invalid_argument("operator-: Incompatible shape.");
     }
-    
+
     matrix<T> result(this->row, this->col);
     for (int i = 0; i < this->row; i++) {
         for (int j = 0; j < this->col; j++) {
-            result.put(i, j, data[i][j] - other.get(i, j));
+            result.put(i, j, this->data[i][j] - other.get(i, j));
         }
     }
     return result;
@@ -355,7 +310,7 @@ matrix<T> matrix<T>::operator*(const matrix<T>& other) const {
         for (int j = 0; j < other.col; j++) {
             T sum = T();
             for (int k = 0; k < this->col; k++) {
-                sum += data[i][k] * other.get(k, j);
+                sum += this->data[i][k] * other.get(k, j);
             }
             result.put(i, j, sum);
         }
@@ -368,10 +323,14 @@ matrix<T> matrix<T>::operator*(const T scalar) const {
     matrix<T> result(this->row, this->col);
     for (int i = 0; i < this->row; i++) {
         for (int j = 0; j < this->col; j++) {
-            result.put(i, j, data[i][j] * scalar);
+            result.put(i, j, this->data[i][j] * scalar);
         }
     }
     return result;
+}
+template <Arithmetic T>
+matrix<T> matrix<T>::operator/(const matrix<T>& other) const {
+    return *this * other.inverse();
 }
 
 template <Arithmetic U>
@@ -384,10 +343,10 @@ matrix<T>& matrix<T>::operator+=(const matrix<T>& other) {
     if (this->row != other.getRow() || this->col != other.getCol()) {
         throw std::invalid_argument("operator+=: Incompatible matrix shape.");
     }
-    
+
     for (int i = 0; i < this->row; i++) {
         for (int j = 0; j < this->col; j++) {
-            data[i][j] += other.get(i, j);
+            this->data[i][j] += other.get(i, j);
         }
     }
     return *this;
@@ -398,10 +357,10 @@ matrix<T>& matrix<T>::operator-=(const matrix<T>& other) {
     if (this->row != other.getRow() || this->col != other.getCol()) {
         throw std::invalid_argument("operator-: Incompatible matrix shape.");
     }
-    
+
     for (int i = 0; i < this->row; i++) {
         for (int j = 0; j < this->col; j++) {
-            data[i][j] -= other.get(i, j);
+            this->data[i][j] -= other.get(i, j);
         }
     }
     return *this;
@@ -411,25 +370,54 @@ template <Arithmetic T>
 matrix<T>& matrix<T>::operator*=(T scalar) {
     for (int i = 0; i < this->row; i++) {
         for (int j = 0; j < this->col; j++) {
-            data[i][j] *= scalar;
+            this->data[i][j] *= scalar;
         }
     }
     return *this;
 }
 
 template <Arithmetic T>
-void matrix<T>::ro(long r1, long c1, long r2, long c2) {
-    if (r1 >= this->row || r2 >= this->row || c1 == 0) throw std::invalid_argument("Invalid argument for r1, r2, and c1");
+matrix<T> matrix<T>::add(const matrix<T>& inputMatrix) const { return *this + inputMatrix; }
+
+template <Arithmetic T>
+matrix<T> matrix<T>::sub(const matrix<T>& inputMatrix) const { return *this - inputMatrix; }
+
+template <Arithmetic T>
+matrix<T> matrix<T>::mult(const matrix<T>& inputMatrix) const { return *this * inputMatrix; }
+
+template <Arithmetic T>
+matrix<T> matrix<T>::div(const matrix<T>& inputMatrix) const { return *this * inputMatrix.inverse(); }
+
+template <Arithmetic T>
+void matrix<T>::ro(long r1, long n1, long r2, long n2) {
+    if (n1 == 0) throw IndexOutOfBoundException("n1 cannot be 0 for row operation r1 = n1r1 + n2r2");
+    if (r1 >= this->row || r2 >= this->row ) throw IndexOutOfBoundException("r1 and/or r2 out of bound");
     for (int c = 0; c < this->col; c++) {
-        data[r1][c] = c1 * data[r1][c] + c2 * data[r2][c];
+        this->data[r1][c] = n1 * this->data[r1][c] + n2 * this->data[r2][c];
+    }
+}
+
+template <Arithmetic T>
+void matrix<T>::co(long c1, long n1, long c2, long n2) {
+    if (n1 == 0) throw IndexOutOfBoundException("n1 cannot be 0 for column operation c1 = n1c1 + n2c2");
+    if (c1 >= this->col || c2 >= this->col) throw IndexOutOfBoundException("c1 and/or c2 out of bound");
+    for (int r = 0; r < this->row; r++) {
+        this->data[r][c1] = n1 * this->data[r][c1] + n2 * this->data[r][c2];
     }
 }
 
 template <Arithmetic T>
 void matrix<T>::re(long r1, long r2) {
-    if (r1 >= this->row || r2 >= this->row) throw std::invalid_argument("r1 and/or r2 out of bound");
+    if (r1 >= this->row || r2 >= this->row) throw IndexOutOfBoundException("r1 and/or r2 out of bound");
 
-    std::swap(data[r1], data[r2]);
+    std::swap(this->data[r1], this->data[r2]);
+}
+
+template <Arithmetic T>
+void matrix<T>::ce(long c1, long c2) {
+    if (c1 >= this->col || c2 >= this->col) throw IndexOutOfBoundException("c1 and/or c2 out of bound");
+
+    std::swap(this->data[c1], this->data[c2]);
 }
 
 template <Arithmetic T>
@@ -485,22 +473,9 @@ matrix<T> matrix<T>::rref(long stop_at) const {
                 break;
             }
         }
-
-        if (pivotCol == -1) continue;
-
-        T pivot = temp.get(r, pivotCol);
-        for (int c = pivotCol; c < this->col; ++c)
-            temp.put(r, c, temp.get(r, c)/pivot);
-
-        for (int i = r - 1; i >= 0; --i) {
-            T factor = temp.get(i, pivotCol);
-            if (factor != T()) {
-                for (int c = pivotCol; c < this->col; ++c)
-                    temp.put(i, c, temp.get(i, c) - factor*temp.get(r, c));
-            }
-        }
     }
-    return temp;
+
+    return m;
 }
 
 template <Arithmetic T>
@@ -508,25 +483,49 @@ matrix<T> matrix<T>::rref() const { return rref(this->col); }
 
 
 template <Arithmetic T>
-T matrix<T>::det() const {
-    if (this->row != this->col) throw std::invalid_argument("Non-square matrix");
+bool matrix<T>::inspan(Vector vector) const {
+    matrix<T> rightside(vector);
+    augmented_matrix<T> augmented(*this, rightside);
 
+
+    try {
+        Solution<T> sol;
+        sol.vector_group = augmented.solve();
+    }
+    catch (const ComputationFailedException&) { return false; }
+    return true;
+}
+
+template <Arithmetic T>
+Solution<T> matrix<T>::solve(Vector vector) const {
+    matrix<T> rightside(vector);
+    augmented_matrix<T> augmented(*this, rightside);
+    Solution<T> sol;
+
+    try { sol.vector_group = augmented.solve(); }
+    catch (const ComputationFailedException&) { sol.type = Solution<T>::SolutionType::NIL; return sol;}
+
+    if (sol.vector_group.size() > 1) {
+        sol.type = Solution<T>::SolutionType::INFINITE;
+        return sol;
+    }
+
+    sol.type = Solution<T>::SolutionType::UNIQUE;
+    return sol;
+}
+
+template <Arithmetic T>
+T matrix<T>::det() const {
+    if (this->row != this->col) throw MalformedMatrixException("Non-square matrix");
+
+    if (this->row == 0 || this->col == 0) return 0;
     if (this->row == 1) return data[0][0];
     if (this->row == 2) return data[0][0] * data[1][1] - data[0][1] * data[1][0];
 
-    T det = 0;
-    for (int c = 0; c < this->col; c++) {
-        matrix<T> subMatrix(this->row - 1, this->col - 1);
-
-        for (int i = 1; i < this->row; i++) {
-            for (int j = 0; j < this->col; j++) {
-                if (j == c) continue;
-                int subCol = (j < c) ? j : j - 1;
-                subMatrix.put(i - 1, subCol, data[i][j]);
-            }
-        }
-        
-        det = (c % 2 != 0)? det - data[0][c] * subMatrix.determinant(): det + data[0][c] * subMatrix.determinant();
+    T det(1);
+    matrix<T> m(this->ref());
+    for (long i = 0; i < m.row; i++) {
+        det *= m.get(i, i);
     }
 
     return det;
@@ -547,13 +546,14 @@ matrix<T> matrix<T>::transpose() const {
 
 template <Arithmetic T>
 matrix<T> matrix<T>::inverse() const {
-    if (this->row != this->col || this->determinant() == 0) throw std::runtime_error("Matrix is not invertible");
+    if (this->row != this->col || this->det() == 0) throw NotInvertibleMatrixException("Matrix is not invertible");
 
-    matrix<T> I(this->row, this->col, "identity");
+    matrix<T> I(this->row, this->col, 1, FillType::DIAGONAL);
+
     augmented_matrix<T> aug(*this, I);
     aug = aug.rref();
 
-    return aug.getRight();
+    return aug.getSide(augmented_matrix<T>::Side::RIGHT);
 }
 
 /*
@@ -562,7 +562,7 @@ TODO: Reimplement
 template <Arithmetic T>
 std::vector<std::complex<double>> matrix<T>::eigenval() const {
     if (this->row != this->col) throw std::invalid_argument("Eigenvalue not defined for non-square matrix");
-    
+
     Eigen::MatrixXd A(this->row, this->col);
     for (int i = 0; i < this->row; i++)
         for (int j = 0; j < this->col; j++)
@@ -609,7 +609,7 @@ matrix<std::complex<double>> matrix<T>::eigenvec() const {
 
 template <Arithmetic T>
 long matrix<T>::rank() const {
-    matrix<T> reduced = this->echelonf();
+    matrix<T> reduced = this->ref();
     int rank = 0;
     for (int i = 0; i < this->row; ++i) {
         for (int j = 0; j < this->col; ++j) {
@@ -620,4 +620,13 @@ long matrix<T>::rank() const {
 }
 
 template <Arithmetic T>
-long matrix<T>::null() const { return this->col - this->rank(); }
+long matrix<T>::nullity() const { return this->col - this->rank(); }
+
+template <Arithmetic T>
+std::vector<long> matrix<T>::dim() const {
+    return std::vector<long>(row, col);
+}
+
+template class matrix<int>;
+template class matrix<double>;
+template class matrix<rational>;

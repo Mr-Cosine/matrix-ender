@@ -12,6 +12,7 @@
  * Parse to number type from string
  */
 
+
 template <typename T>
 T from_string(std::string);
 

@@ -105,6 +105,12 @@ trat:
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -DDEBUG_RATIONAL src/rational.cpp -o tmp-exec/rational && tmp-exec/rational
 tmat:
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -DDEBUG_MATRIX $(MRD) -o tmp-exec/matrix && tmp-exec/matrix
+
+test-matrix:
+	$(MD) tmp-exec
+	$(CXX) $(CXXFLAGS) $(INCLUDES) src/local_test_suite/test_matrix.cpp -o tmp-exec/test_matrix
+	./tmp-exec/test_matrix
+
 tcli:
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -DDEBUG_CLI src/CLI.cpp $(MRD) -o tmp-exec/cli && tmp-exec/cli
 tloop:
