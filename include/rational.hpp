@@ -4,7 +4,13 @@
 
 #pragma once
 #include <sstream>
-#include <concepts.hpp>
+#include "concepts.hpp"
+
+template <Ordered T>
+inline constexpr bool is_zero(T);
+
+template <Ordered T>
+inline constexpr bool equals(T, T);
 
 class rational {
     long num, denom;
@@ -19,7 +25,16 @@ public:
      *
      * @return A Rational type
      */
-    rational(long, long);
+    constexpr rational(long numerator, long denominator) {
+        long a = numerator, b = denominator;
+        while (a % b != 0) {
+            long tmp = a;
+            a = b;
+            b = tmp % b;
+        }
+        this->num   = numerator / b;
+        this->denom = denominator / b;
+    }
 
     /**
      * Instantiates a fraction based on a string descriptor and a delimiter
@@ -39,14 +54,14 @@ public:
      *
      * @return A Rational type
      */
-    rational(long);
+    constexpr rational(long num) : num(num), denom(1) {}
 
     /**
      * Instantiates a zero fraction
      *
      * @return A Rational type
      */
-    rational();
+    constexpr rational() : num(0), denom(1) {}
 
     /**
      * Adds two Rational number
@@ -94,6 +109,42 @@ public:
     rational operator/(const rational&) const;
 
     /**
+     * Not equal
+     *
+     * @param other Rational being compared
+     *
+     * @return Boolean
+     */
+    rational operator+=(const rational&) const;
+
+    /**
+     * Not equal
+     *
+     * @param other Rational being compared
+     *
+     * @return Boolean
+     */
+    rational operator-=(const rational&) const;
+
+    /**
+     * Not equal
+     *
+     * @param other Rational being compared
+     *
+     * @return Boolean
+     */
+    rational operator*=(const rational&) const;
+
+    /**
+     * Not equal
+     *
+     * @param other Rational being compared
+     *
+     * @return Boolean
+     */
+    rational operator/=(const rational&) const;
+
+    /**
      * Equal
      *
      * @param other Rational being compared
@@ -103,6 +154,24 @@ public:
     bool operator==(const rational&) const;
 
     /**
+     * Greater than
+     *
+     * @param other Rational being compared
+     *
+     * @return Boolean
+     */
+    bool operator>(const rational&) const;
+
+    /**
+     * Less than
+     *
+     * @param other Rational being compared
+     *
+     * @return Boolean
+     */
+    bool operator<(const rational&) const;
+
+    /**
      * Not equal
      *
      * @param other Rational being compared
@@ -110,6 +179,10 @@ public:
      * @return Boolean
      */
     bool operator!=(const rational&) const;
+
+    explicit constexpr operator bool() const {
+        return this->num == 0;
+    }
 
     /**
      * Multiplicative inverse
@@ -139,4 +212,7 @@ public:
     }
 
     double toDouble() const;
+
+    friend inline constexpr bool is_zero<rational>(rational);
+    friend inline constexpr bool equals<rational>(rational, rational);
 };

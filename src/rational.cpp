@@ -3,7 +3,6 @@
  */
 #include "rational.hpp"
 
-
 #ifdef DEBUG_RATIONAL
 #include <iostream>
 using namespace std;
@@ -39,26 +38,10 @@ int main() {
 }
 #endif
 
-
-rational::rational(long numerator, long denominator) {
-    long a = numerator, b = denominator;
-    while (a % b != 0) {
-        long tmp = a;
-        a = b;
-        b = tmp % b;
-    }
-    this->num   = numerator / b;
-    this->denom = denominator / b;
-}
-
 rational::rational(std::string descriptor, char delimiter) : rational(
     std::stoi(descriptor.substr(0, descriptor.find(delimiter))),
     std::stoi(descriptor.substr(descriptor.find(delimiter) + 1, descriptor.size()))
 ) {}
-
-rational::rational(long num) : num(num), denom(1) {}
-
-rational::rational() : num(0), denom(1) {}
 
 rational rational::operator+(const rational& other) const {
     return rational(
@@ -89,14 +72,39 @@ rational rational::operator*(const rational& other) const {
 }
 
 rational rational::operator/(const rational& other) const {
+    // TODO: Implement division by zero check
     return rational(
         this->num * other.denom,
         this->denom * other.num
     );
 }
 
+rational rational::operator+=(const rational& other) const {
+    return *this + other;
+}
+
+rational rational::operator-=(const rational& other) const {
+    return *this - other;
+}
+
+rational rational::operator*=(const rational& other) const {
+    return *this * other;
+}
+
+rational rational::operator/=(const rational& other) const {
+    return *this / other;
+}
+
 bool rational::operator==(const rational& other) const {
     return this->num == other.num && this->denom == other.denom;
+}
+
+bool rational::operator>(const rational& other) const {
+    return (this->num * other.denom) > (this->denom * other.num);
+}
+
+bool rational::operator<(const rational& other) const {
+    return (this->num * other.denom) < (this->denom * other.num);
 }
 
 bool rational::operator!=(const rational& other) const {

@@ -22,6 +22,9 @@
 #include "util.hpp"
 #include "concepts.hpp"
 #include "rational.hpp"
+#include "aug_matrix.hpp"
+#include "exceptions.hpp"
+#include "vec_util.hpp"
 
 enum class FillType {
     UPPER_TRI,
@@ -43,74 +46,6 @@ struct Solution {
 
     std::vector<std::vector<T>> vector_group;
     SolutionType type;
-};
-
-// Matrix Exception Types
-class NotInvertibleMatrixException: public std::exception {
-private:
-    std::string message;
-
-public:
-    explicit NotInvertibleMatrixException(std::string message) : message(message) {}
-
-    const char* what() const noexcept override {
-        return this->message.c_str();
-    }
-};
-
-class InvalidFillTypeException: public std::exception {
-private:
-    std::string message;
-public:
-    explicit InvalidFillTypeException(std::string message) : message(message) {}
-
-    const char* what() const noexcept override {
-        return this->message.c_str();
-    }
-};
-
-class IndexOutOfBoundException: public std::exception {
-private:
-    std::string message;
-public:
-    explicit IndexOutOfBoundException(std::string message) : message(message) {}
-
-    const char* what() const noexcept override {
-        return this->message.c_str();
-    }
-};
-
-class MalformedMatrixException: public std::exception {
-private:
-    std::string message;
-public:
-    explicit MalformedMatrixException(std::string message) : message(message) {}
-
-    const char* what() const noexcept override {
-        return this->message.c_str();
-    }
-};
-
-class ComputationFailedException: public std::exception {
-private:
-    std::string message;
-public:
-    explicit ComputationFailedException(std::string message) : message(message) {}
-
-    const char* what() const noexcept override {
-        return this->message.c_str();
-    }
-};
-
-class InvalidArgumentException: public std::exception {
-private:
-    std::string message;
-public:
-    explicit InvalidArgumentException(std::string message) : message(message) {}
-
-    const char* what() const noexcept override {
-        return this->message.c_str();
-    }
 };
 
 // Matrix class
@@ -138,7 +73,7 @@ public:
         col(1),
         data(row, std::vector<T>(col))
     {
-        for (int r = 0; r < vector.size(); r++) {
+        for (size_t r = 0; r < vector.size(); r++) {
             data[r][0] = vector[r];
         }
     }
@@ -167,9 +102,6 @@ public:
         this->row = this->data.size();
         this->col = this->row > 0 ? this->data[0].size() : 0;
     }
-
-    // Initializer list constructor
-    matrix(std::initializer_list<std::initializer_list<T>>);
 
     // Insert value at [r,c] (in-place)
     void put(long, long, T);
@@ -251,6 +183,9 @@ public:
     // Column exchange (in-place)
     void ce(long, long);
 
+    // Append a row (in-place)
+    void append_row(const std::vector<T>&);
+
     // get row echelon form
     matrix<T> ref() const;
     matrix<T> ref(long) const; //echelon but up until a column, not to end
@@ -301,4 +236,8 @@ public:
 
     // Get dimension of matrix
     std::vector<long> dim() const;
+    
+    template <typename U>
+    requires Ordered<U> && Arithmetic<U>
+    friend inline matrix<U> gram_schmidtize(const matrix<U>& m, bool tranpose_me);
 };

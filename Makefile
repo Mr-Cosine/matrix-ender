@@ -65,7 +65,7 @@ OBJECTS		:= $(SOURCES:.cpp=.o)
 DEPS		:= $(OBJECTS:.o=.d)
 
 # Matrix + Rational dependencies
-MRD := src/matrix.cpp src/rational.cpp
+MRD := src/matrix.cpp src/rational.cpp src/aug_matrix.cpp
 
 #
 # The following part of the makefile is generic; it can be used to

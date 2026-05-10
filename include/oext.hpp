@@ -50,11 +50,23 @@ inline std::ostream& operator<<(std::ostream& os, const Variable::ExactType& typ
     }
 }
 
-template <typename T>
+template <Arithmetic T>
 inline std::ostream& operator<<(std::ostream& os, const matrix<T>& mat) {
     return os << mat.toString();
 }
 
 inline std::ostream& operator<<(std::ostream& os, const rational& rational) {
     return os << rational.toString();
+}
+
+template <Arithmetic T>
+inline std::ostream& operator<<(std::ostream& os, const VectorPack<T>& vp) {
+    for (size_t i = 0; i < vp[0].size(); i++) {
+        for (size_t j = 0; j < vp.size(); j++) {
+            if (j != vp.size() - 1) os << "\t";
+        }
+        if (i != vp[0].size() - 1) os << "\n";
+    }
+    os.flush();
+    return os;
 }
