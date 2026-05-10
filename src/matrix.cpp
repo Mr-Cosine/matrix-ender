@@ -4,11 +4,8 @@ TODO list:
 */
 
 #include "matrix.hpp"
-<<<<<<< HEAD
-=======
 #include <iostream>
 #include "util.hpp"
->>>>>>> cli_basics
 
 /*
 #include <type_traits>
@@ -426,6 +423,11 @@ void matrix<T>::ce(long c1, long c2) {
 }
 
 template <Arithmetic T>
+void matrix<T>::append_row(const std::vector<T>& vec) {
+    this->data.push_back(vec);
+}
+
+template <Arithmetic T>
 matrix<T> matrix<T>::ref(long stop_at) const {
     if (data.empty() || data[0].empty()) throw std::runtime_error("Matrix is empty");
 
@@ -462,7 +464,7 @@ matrix<T> matrix<T>::ref(long stop_at) const {
 
 template <Arithmetic T>
 matrix<T> matrix<T>::ref() const { return ref(this->col); }
-
+/*
 template <Arithmetic T>
 matrix<T> matrix<T>::rref(long stop_at) const {
     matrix<T> m(*this);
@@ -494,8 +496,8 @@ matrix<T> matrix<T>::rref(long stop_at) const {
 
     return m;
 }
+*/
 
-/*
 template <Arithmetic T>
 matrix<T> matrix<T>::rref(long stop_at) const {
     if (data.empty() || data[0].empty())
@@ -506,7 +508,7 @@ matrix<T> matrix<T>::rref(long stop_at) const {
     for (int r = this->row - 1; r >= 0; --r) {
         int pivotCol = -1;
         for (int c = 0; c < stop_at; ++c) {
-            if (temp.get(r, c) != T()) {
+            if ((temp.get(r, c))) {
                 pivotCol = c;
                 break;
             }
@@ -519,7 +521,7 @@ matrix<T> matrix<T>::rref(long stop_at) const {
 template <Arithmetic T>
 matrix<T> matrix<T>::rref() const { return rref(this->col); }
 
-
+/*
 template <Arithmetic T>
 bool matrix<T>::inspan(Vector vector) const {
     matrix<T> rightside(vector);
@@ -541,7 +543,6 @@ Solution<T> matrix<T>::solve(Vector vector) const {
     augmented_matrix<T> augmented(*this, rightside);
     Solution<T> sol;
 
-<<<<<<< HEAD
     try { sol.vector_group = augmented.solve(); }
     catch (const ComputationFailedException&) { sol.type = Solution<T>::SolutionType::NIL; return sol;}
 
@@ -554,46 +555,24 @@ Solution<T> matrix<T>::solve(Vector vector) const {
     return sol;
 }
 
+/*
 template <Arithmetic T>
 T matrix<T>::det() const {
     if (this->row != this->col) throw MalformedMatrixException("Non-square matrix");
-=======
-/*
-template <Arithmetic T>
-T matrix<T>::detalt() const {
-    if (this->row != this->col) throw std::invalid_argument("Non-square matrix");
->>>>>>> cli_basics
 
     if (this->row == 0 || this->col == 0) return 0;
     if (this->row == 1) return data[0][0];
     if (this->row == 2) return data[0][0] * data[1][1] - data[0][1] * data[1][0];
 
-<<<<<<< HEAD
     T det(1);
     matrix<T> m(this->ref());
     for (long i = 0; i < m.row; i++) {
         det *= m.get(i, i);
-=======
-    T det = 0;
-    for (int c = 0; c < this->col; c++) {
-        matrix<T> subMatrix(this->row - 1, this->col - 1);
-
-        for (int i = 1; i < this->row; i++) {
-            for (int j = 0; j < this->col; j++) {
-                if (j == c) continue;
-                int subCol = (j < c) ? j : j - 1;
-                subMatrix.put(i - 1, subCol, data[i][j]);
-            }
-        }
-        
-        det = (c % 2 != 0)? det - data[0][c] * subMatrix.det(): det + data[0][c] * subMatrix.det();
->>>>>>> cli_basics
     }
 
     return det;
 }
 */
-
 
 template <Arithmetic T>
 T matrix<T>::det() const {

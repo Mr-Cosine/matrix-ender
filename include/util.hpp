@@ -218,9 +218,54 @@ inline constexpr bool is_zero<double>(double v) {
     return std::abs(v) < 1e-6;
 }
 
+template <Ordered T>
+inline constexpr bool is_zero<double>(std::vector<T> v) {
+    return std::all_of(v.begin(), v.end(), [](T a) {
+        return is_zero(a);
+    });
+}
+
 template <>
 inline bool is_zero<rational>(rational r) {
     return r.num == 0;
+}
+
+template <Ordered T>
+inline constexpr bool equals(T, T);
+
+template <>
+inline constexpr bool equals<char>(char value, char target) {
+    return value == target;
+}
+
+template <>
+inline constexpr bool equals<short>(short value, short target) {
+    return value == target;
+}
+
+template <>
+inline constexpr bool equals<int>(int value, int target) {
+    return value == target;
+}
+
+template <>
+inline constexpr bool equals<long>(long value, long target) {
+    return value == target;
+}
+
+template <>
+inline constexpr bool equals<float>(float value, float target) {
+    return std::abs(value - target) < 1e-6;
+}
+
+template <>
+inline constexpr bool equals<double>(double value, double target) {
+    return std::abs(value - target) < 1e-6;
+}
+
+template <>
+inline constexpr bool equals<rational>(rational value, rational target) {
+    return value.num - target.num == 0;
 }
 
 // Colorful terminal

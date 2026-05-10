@@ -175,6 +175,9 @@ public:
     // Column exchange (in-place)
     void ce(long, long);
 
+    // Append a row (in-place)
+    void append_row(std::vector<T>);
+
     // get row echelon form
     matrix<T> ref() const;
     matrix<T> ref(long) const; //echelon but up until a column, not to end

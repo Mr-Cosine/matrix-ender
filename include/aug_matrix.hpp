@@ -251,7 +251,7 @@ class augmented_matrix {
 
             solution.push_back(particular);
 
-            if (pivots.size() < left.getCol()) {
+            if (pivots.size() < static_cast<size_t>(left.getCol())) {
                 for (int c = 0; c < reduced.left.getCol(); c++) {
                     bool isFree = true; for (const auto& p : pivots) if (p.col == c) { isFree = false; break; }
 

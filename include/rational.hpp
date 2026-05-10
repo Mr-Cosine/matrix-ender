@@ -4,10 +4,13 @@
 
 #pragma once
 #include <sstream>
-#include <concepts.hpp>
+#include "concepts.hpp"
 
 template <Ordered T>
-inline constexpr bool is_zero(T a);
+inline constexpr bool is_zero(T);
+
+template <Ordered T>
+inline constexpr bool equals(T, T);
 
 class rational {
     long num, denom;
@@ -207,4 +210,5 @@ public:
     double toDouble() const;
 
     friend inline constexpr bool is_zero<rational>(rational);
+    friend inline constexpr bool equals<rational>(rational, rational);
 };

@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include <rational.hpp>
 #include <concepts>
 #include <type_traits>
 
