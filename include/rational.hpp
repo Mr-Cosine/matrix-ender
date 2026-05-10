@@ -180,6 +180,10 @@ public:
      */
     bool operator!=(const rational&) const;
 
+    explicit constexpr operator bool() const {
+        return this->num == 0;
+    }
+
     /**
      * Multiplicative inverse
      *

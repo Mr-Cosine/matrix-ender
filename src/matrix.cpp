@@ -6,6 +6,7 @@ TODO list:
 #include "matrix.hpp"
 #include <iostream>
 #include "util.hpp"
+#include "vec_util.hpp"
 
 /*
 #include <type_traits>
@@ -67,6 +68,7 @@ int main() {
     t.rref().print();
     print("Determinant:", t.det());
 
+    matrix<double> gsch = gram_schmidtize<double>(t);
     return 0;
 }
 #endif

@@ -176,7 +176,7 @@ public:
     void ce(long, long);
 
     // Append a row (in-place)
-    void append_row(std::vector<T>);
+    void append_row(const std::vector<T>&);
 
     // get row echelon form
     matrix<T> ref() const;
