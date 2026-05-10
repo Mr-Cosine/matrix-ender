@@ -19,6 +19,7 @@
 #include "rational.hpp"
 #include "aug_matrix.hpp"
 #include "exceptions.hpp"
+#include "vec_util.hpp"
 
 enum class FillType {
     UPPER_TRI,
@@ -228,4 +229,8 @@ public:
 
     // Get dimension of matrix
     std::vector<long> dim() const;
+    
+    template <typename U>
+    requires Ordered<U> && Arithmetic<U>
+    friend inline matrix<U> gram_schmidtize(const matrix<U>& m, bool tranpose_me);
 };

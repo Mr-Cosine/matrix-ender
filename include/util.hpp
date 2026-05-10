@@ -14,6 +14,9 @@
  * Parse to number type from string
  */
 
+ // Forward declarations
+template <Arithmetic T>
+class Vector;
 
 template <typename T>
 T from_string(std::string);
@@ -219,7 +222,7 @@ inline constexpr bool is_zero<double>(double v) {
 }
 
 template <Ordered T>
-inline constexpr bool is_zero(std::vector<T> v) {
+inline constexpr bool is_zero(Vector<T> v) {
     return std::all_of(v.begin(), v.end(), [](T a) {
         return is_zero(a);
     });

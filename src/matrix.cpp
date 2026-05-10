@@ -7,6 +7,7 @@ TODO list:
 #include <iostream>
 #include "util.hpp"
 #include "vec_util.hpp"
+#include <cmath>
 
 /*
 #include <type_traits>
@@ -38,6 +39,20 @@ template <typename T>
 inline std::ostream& operator<<(std::ostream& os, const matrix<T>& mat) {
     return os << mat.toString();
 }
+
+template <Arithmetic T>
+inline std::ostream& operator<<(std::ostream& os, const VectorPack<T>& vp) {
+    for (size_t i = 0; i < vp[0].size(); i++) {
+        for (size_t j = 0; j < vp.size(); j++) {
+            os << static_cast<double>(std::round(vp[j][i] * 1e4)) / 1e4;
+            if (j != vp.size() - 1) os << "\t";
+        }
+        if (i != vp[0].size() - 1) os << "\n";
+    }
+    os.flush();
+    return os;
+}
+
 int main() {
     
     print("=== MATRIX MODULE DEBUG ===\n");
@@ -66,9 +81,16 @@ int main() {
     matrix<double> t("[34,24,236,11;0,0,12,55;0,0,0,26;0,0,0,0]");
     t.print();
     t.rref().print();
-    print("Determinant:", t.det());
-
-    matrix<double> gsch = gram_schmidtize<double>(t);
+    print("Determinant:", t.det(), "\n");
+    
+    VectorPack<double> pack{
+        {1, 1, 0, 2},
+        {2, 1, 1, 0},
+        {1, 0, 1, 1},
+        {3, 2, 1, 4}
+    };
+    VectorPack<double> gsch = gram_schmidtize<double>(pack);
+    std::cout << gsch << std::endl;
     return 0;
 }
 #endif
