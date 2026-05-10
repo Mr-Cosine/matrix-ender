@@ -217,18 +217,18 @@ inline std::ostream& operator<<(std::ostream& os, const Vector<T>& vector) {
 }
 
 /**
- * @brief The Grand Schmidt Process: https://en.wikipedia.org/wiki/Gram–Schmidt_process
+ * @brief The Gram Schmidt Process: https://en.wikipedia.org/wiki/Gram–Schmidt_process
  * 
  * @note The function does not modify the input matrix
  * 
  * The function transforms the input into an orthonormal matrix. The first vector will be used
  * as the basis. Zero vectors will be skipped. (TO BE IMPLEMENTED)
  * 
- * @param m The matrix to be Gram Schmidtized
+ * @param m The `VectorPack` to be Gram Schmidtized
  * 
  * @throws Throws `NonsquareMatrixException` if the input matrix is not a square matrix
  * 
- * @returns An orthonormal matrix
+ * @returns An orthonormal `VectorPack`
  */
 template <typename T>
 requires Ordered<T> && Arithmetic<T>

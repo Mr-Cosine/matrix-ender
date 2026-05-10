@@ -465,6 +465,7 @@ matrix<T> matrix<T>::rref(long stop_at) const {
                 break;
             }
         }
+    }
 
     return temp;
 }

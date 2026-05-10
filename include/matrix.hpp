@@ -62,10 +62,10 @@ public:
     matrix() : row(0), col(0) {};
 
     // Size constructor
-    matrix(long, long);
+    // matrix(long, long);
 
     // Filler constructor
-    matrix(long, long, T, FillType = FillType::EVERY);
+    matrix(long, long, T = T(), FillType = FillType::EVERY);
 
     //Constructor from a vector
     matrix(const Vector& vector) :
