@@ -1,12 +1,12 @@
 #include "CLI.hpp"
 #include "oext.hpp" // <-- must be included after CLI enum declaration
-
+#include <cstdlib>
 
 #ifdef DEBUG_CLI
 using std::cout, std::cin, std::endl;
 int main() {
     cout << "===== MATRIX-ENDER TERMINAL (DEBUG) =====\n";
-    cout << "MET(v0.0) by A1batr0z & Mr-Cosine | Enter `help` to get help list.\n" << endl;
+    cout << "MET(v0.1) by A1batr0z & Mr-Cosine | Enter `help` to print help list.\n" << endl;
 
     add_var("myvar", "[1,2,3;4,5,6]");
     add_var("other", "[1/2, 3/4; 5/6, 7/8]");
@@ -16,6 +16,32 @@ int main() {
     print_var("other");
     print_var("dec");
 
+    return 0;
+}
+#endif
+
+#ifdef DEBUG_CLI_LOOP
+using std::cout, std::cin, std::endl;
+int main() {
+    #ifdef _WIN32
+    std::system("cls");
+    #else
+    std::system("clear");
+    #endif
+
+    cout << "===== MATRIX-ENDER TERMINAL (DEBUG) =====\n";
+    cout << "MET(v0.1) by A1batr0z & Mr-Cosine | Enter `help` to print help list.\n" << endl;
+
+    std::string user_cmd{};
+    while (true) {
+        std::cout << "[$user] >>> ";
+        std::getline(std::cin, user_cmd);
+
+        if (user_cmd == ":q" || user_cmd == ":quit") break;
+        parse_command(user_cmd);
+    }
+
+    cout << "\nClosing app...\n" << std::endl;
     return 0;
 }
 #endif
@@ -133,35 +159,138 @@ void add_var(std::string identifier, std::string variable_string) {
     __variables__.insert_or_assign(identifier, raw_ptr);
 }
 
-void print_var(std::string identifier) {
+void print_var(std::string identifier, std::ostream& os) {
     auto it = __variables__.find(identifier);
     if (it != __variables__.end()) {
         auto data = it->second->self;
         auto type = it->second->type;
         auto etype = it->second->etype;
         std::visit([&](auto&& arg) {
-            std::cout << identifier << type << etype << " =>\n" << arg << std::endl;
+            if (type == Variable::VarType::PRIMITIVE) {
+                os << identifier << type << etype << " => " << arg << std::endl;
+            } else {
+                os << identifier << type << etype << " =>\n" << arg << std::endl;
+            }
         }, data);
     } else {
-        std::cout << identifier << " => " << "[undefined]" << std::endl;
+        os << identifier << " => [undefined]" << std::endl;
     }
 }
 
-/*
-TODO: Implement
 
-std::string parse_command(std::string cmd) {
-    std::istringstream iss(cmd);
-    std::string cmd_tkn;
-    std::getline(iss, cmd_tkn, ' ');
+void parse_command(std::string str) {
+    std::vector<std::string> tkns = split(str, ' ');
+    std::transform(tkns.begin(), tkns.end(), tkns.begin(), [](std::string s) {
+        return removeAll(s, ' ');
+    });
+    std::string cmd = tkns[0];
 
-    if (cmd_tkn == "let") {
-        // Variable definition
-        
+    if (cmd == "echo") {
+
+        std::cout << join(std::vector<std::string>(
+            tkns.begin() + 1,
+            tkns.end()
+        ), ' ') << std::endl;
+
+    } else if (cmd == "help") {
+
+        std::cout << std::endl << "=== List of Commands ===\n"
+        "echo \t- echo the argument list\n"
+        "help \t- show this message\n" << std::endl;
 
     } else {
-        // Variable retrieval
+        // Other commands
 
+        if (contains(str, '=')) {
+
+            std::vector<std::string> ss = split(str, '=', 1);
+
+            std::transform(ss.begin(), ss.end(), ss.begin(), trim);
+            
+            // Var name check
+            if (containsAny(ss[0], "#%^&*[]:;\"'.,< >")) {
+                err("Rejected: Invalid variable identifier. Must not contain '#%^&*[]:;\"'.,< >'");
+            }
+
+            add_var(ss[0], trim(ss[1]));
+
+        } else {
+
+            std::cout << std::endl;
+            print_var(str);
+            std::cout << std::endl;
+
+        }
     }
 }
-*/
+
+template <typename T>
+void evalUpdate(std::string str, T& store) {
+    if (__variables__.contains(str)) {
+        std::visit([&store](auto&& arg) {
+            store += arg;
+        }, __variables__[str]->self);
+    }
+}
+
+void eval(std::string str) {
+    str = trim(str);
+
+    size_t post_last_op = 0, i = 0;
+    std::vector<std::string> tkns;
+    Variable::ExactType prevalence = Variable::ExactType::NUMBER;
+
+    for (size_t i = 0; i < str.size() + 1; i++) {
+        if (i == str.size() || contains("+-*/", str[i])) {
+
+            // Validity check
+            std::string tkn = trim(str.substr(post_last_op, i - post_last_op + 1));
+            if (containsAny(tkn, "#%^&*[]:;\"'.,< >")) {
+                std::cout << "[DNE]";
+                return;
+            } else if (!isNumeric(tkn) && !__variables__.contains(tkn)) {
+                std::cout << "[DNE]";
+                return;
+            }
+
+            // Prevalent type check
+            if ((__variables__.contains(tkn)
+                && __variables__[tkn]->etype == Variable::ExactType::DECIMAL)
+                || isDecimal(str)) {
+                prevalence = Variable::ExactType::DECIMAL;
+            }
+
+            tkns.push_back(tkn);
+            tkns.push_back(std::to_string(str[i]));
+            post_last_op = i + 1;
+        }
+    }
+
+
+    switch (prevalence) {
+        case Variable::ExactType::DECIMAL: {
+            long accumulator = 0;
+            char oper = '+';
+
+            for (size_t i = 0; i < tkns.size(); i++) {
+                if (tkns.size() == 1 && contains("+-*/", tkns[i][0])) {
+                    oper = tkns[i][0];
+                }
+
+                switch (oper) {
+                    case '+':
+                        
+                        break;
+                    case '-':
+                        break;
+                }
+            }
+            break;
+        }
+
+        case Variable::ExactType::NUMBER: {
+            double accumulator = 0;
+            break;
+        }
+    }
+}

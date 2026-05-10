@@ -4,6 +4,7 @@
 
 #pragma once
 #include <sstream>
+#include <concepts.hpp>
 
 class rational {
     long num, denom;
@@ -41,6 +42,13 @@ public:
     rational(long);
 
     /**
+     * Instantiates a zero fraction
+     *
+     * @return A Rational type
+     */
+    rational();
+
+    /**
      * Adds two Rational number
      *
      * @param other Value being added
@@ -50,7 +58,7 @@ public:
     rational operator+(const rational&) const;
 
     /**
-     * Subtract two Rational number
+     * Subtract two Rational number (Binary -)
      *
      * @param other Value being subtracted
      *
@@ -59,7 +67,16 @@ public:
     rational operator-(const rational&) const;
 
     /**
-     * Multiply two Rational number
+     * Additive inverse
+     *
+     * @param other Value being subtracted
+     *
+     * @return A Rational type
+     */
+    rational operator-() const;
+
+    /**
+     * Multiply
      *
      * @param other Multiplier
      *
@@ -68,7 +85,7 @@ public:
     rational operator*(const rational&) const;
 
     /**
-     * Subtract
+     * Divide
      *
      * @param other Divisor
      *
@@ -77,21 +94,39 @@ public:
     rational operator/(const rational&) const;
 
     /**
-     * Find the multiplicative inverse of a Rational
+     * Equal
+     *
+     * @param other Rational being compared
+     *
+     * @return Boolean
+     */
+    bool operator==(const rational&) const;
+
+    /**
+     * Not equal
+     *
+     * @param other Rational being compared
+     *
+     * @return Boolean
+     */
+    bool operator!=(const rational&) const;
+
+    /**
+     * Multiplicative inverse
      *
      * @return A Rational type
      */
     rational inv() const;
 
     /**
-     * Find the additive inverse of a Rational
+     * Additive inverse (Function-style)
      *
      * @return A Rational type
      */
     rational neg() const;
 
     /**
-     * Find the additive inverse of a Rational
+     * Stringnify a rational
      *
      * @param delimiter Fraction separator (defaults to '/')
      * 
@@ -102,4 +137,6 @@ public:
         ss << this->num << separator << this->denom;
         return ss.str();
     }
+
+    double toDouble() const;
 };

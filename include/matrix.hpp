@@ -10,6 +10,9 @@
 #include <vector>
 #include <sstream>
 #include <iomanip>
+#include <stdexcept>
+#include <algorithm>
+#include <initializer_list>
 
 #include "util.hpp"
 #include "concepts.hpp"
@@ -118,8 +121,8 @@ public:
     // Default constructor (std::variant compatibility)
     matrix() : row(0), col(0) {};
 
-    // Constructor to define the size
-    matrix(long r, long c) : row(r), col(c) { data.resize(r, std::vector<T>(c)); };
+    // Size constructor
+    matrix(long, long);
 
     // Filler constructor
     matrix(long, long, T, FillType = FillType::EVERY);
@@ -142,7 +145,7 @@ public:
         if (descriptor.find('[') != std::string::npos && descriptor.find(']') != std::string::npos) {
             descriptor = descriptor.substr(descriptor.find('[') + 1, descriptor.find(']') - descriptor.find('[') - 1);
         } else if (descriptor.find('[') != std::string::npos && descriptor.find(']') != std::string::npos) {
-            throw MalformedMatrixException("[ was never closed");
+            throw MalformedMatrixException("[ was never closed.");
         }
 
         std::istringstream iss(descriptor);
@@ -159,6 +162,9 @@ public:
         this->row = this->data.size();
         this->col = this->row > 0 ? this->data[0].size() : 0;
     }
+
+    // Initializer list constructor
+    matrix(std::initializer_list<std::initializer_list<T>>);
 
     // Insert value at [r,c] (in-place)
     void put(long, long, T);
@@ -190,14 +196,14 @@ public:
                 if (line_break) oss << "\n";
             }
         }
-        oss << "]" << std::endl;
+        oss << "]";
         return oss.str();
     }
 
     // Print the matrix
     void print(char = '\n', char = ',', bool = true, bool = true) const;
 
-    // Matrix arithmetics (symbolic)
+    // Symbolic
 
     matrix<T> operator+(const matrix<T>&) const;
     matrix<T> operator-(const matrix<T>&) const;
@@ -207,15 +213,24 @@ public:
 
     matrix<T>& operator+=(const matrix<T>&);
     matrix<T>& operator-=(const matrix<T>&);
+    matrix<T>& operator*=(const matrix<T>&);
     matrix<T>& operator*=(T);
 
-    // Matrix arithmetics (method invoc.)
+    // Function-style
+
     matrix<T> add(const matrix<T>&) const;
     matrix<T> sub(const matrix<T>&) const;
     matrix<T> mult(const matrix<T>&) const;
     matrix<T> div(const matrix<T>&) const;
 
     // Matrix operations
+
+    // Symbolic
+
+    // Invert a matrix
+    matrix<T> operator~() const;
+
+    // Function-style
 
     // Row operation (in-place)
     void ro(long, long, long, long);

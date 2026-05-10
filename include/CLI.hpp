@@ -10,6 +10,7 @@
 #include <sstream>
 #include <memory>
 #include <iostream>
+#include <algorithm>
 
 #include "matrix.hpp"
 #include "rational.hpp"
@@ -57,7 +58,7 @@ inline std::unordered_map<std::string, Variable*> __variables__;
 void add_var(std::string, std::string);
 
 // Print var
-void print_var(std::string);
+void print_var(std::string, std::ostream& = std::cout);
 
 // Command parsing
-std::string parse_command(std::string);
+void parse_command(std::string);
