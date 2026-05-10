@@ -7,12 +7,6 @@ TODO list:
 #include "aug_matrix.hpp"
 
 /*
-#include <type_traits>
-#include <complex>
-#include <Eigen/Eigenvalues>
-*/
-
-/*
 template <typename T>
 inline std::ostream& operator<<(std::ostream& os, const matrix<T>& mat) {
     return os << mat.toString();
@@ -37,7 +31,7 @@ inline std::ostream& operator<<(std::ostream& os, const matrix<T>& mat) {
     return os << mat.toString();
 }
 int main() {
-    
+
     print("=== MATRIX MODULE DEBUG ===\n");
 
     matrix<int> mymat(4, 4, 1, FillType::UPPER_TRI_R);
@@ -137,6 +131,19 @@ matrix<T>::matrix(long row, long column, T filler, FillType fill_type)
             default:
                 throw InvalidFillTypeException("fill_type does not conform to any FillType enum");
         }
+}
+
+template <Arithmetic T>
+void matrix<T>::printf() const {
+    if (data.empty() || data[0].empty()) { throw std::runtime_error("Matrix is empty"); }
+
+    for (const auto& matrixRow : data) {
+        std::cout << '[';
+        for (const auto& entry : matrixRow) {
+            std::cout << std::setw(8) << entry;
+        }
+        std::cout << std::setw(8) << ']' << std::endl;
+    }
 }
 
 template <Arithmetic T>

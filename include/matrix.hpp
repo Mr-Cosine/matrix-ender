@@ -13,6 +13,11 @@
 #include <stdexcept>
 #include <algorithm>
 #include <initializer_list>
+/*
+#include <type_traits>
+#include <complex>
+#include <Eigen/Eigenvalues>
+*/
 
 #include "util.hpp"
 #include "concepts.hpp"
@@ -200,6 +205,8 @@ public:
         return oss.str();
     }
 
+    // Print the matrix in fixed format: [x1 setw(8) x2 setw(8) x3...]
+    void printf() const;
     // Print the matrix
     void print(char = '\n', char = ',', bool = true, bool = true) const;
 
