@@ -382,32 +382,34 @@ matrix<T> matrix<T>::ref() const { return ref(this->col); }
 
 template <Arithmetic T>
 matrix<T> matrix<T>::rref(long stop_at) const {
-    matrix<T> m(*this);
+    if (data.empty() || data[0].empty())
+        throw std::runtime_error("Matrix is empty");
 
-    long constraint = min(this->col, this->row, stop_at);
-    for (long col = 0; col < constraint; col++) {
-        long row = col;
-        while (row < m.row && m.get(row, col) == T(0)) row++;
-        if (row == m.row) continue;
-        else if (row != col) m.re(col, row);
+    matrix<T> temp = this->ref(stop_at);
 
-        T pivot = m.get(col, col);
-        std::vector<T>& cr = m.data[col];
-        std::transform(cr.begin(), cr.end(), cr.begin(), [&](T entry) {
-            return entry / pivot;
-        });
+    for (int r = this->row - 1; r >= 0; --r) {
+        int pivotCol = -1;
+        for (int c = 0; c < stop_at; ++c) {
+            if (temp.get(r, c) != T()) {
+                pivotCol = c;
+                break;
+            }
+        }
 
-        for (int i = 0; i < this->row; i++) {
-            if (i == col) continue;
+        if (pivotCol == -1) continue;
 
-            T coef = m.get(i, col);
-            for (int j = 0; j < this->col; j++) {
-                m.data[i][j] -= m.data[col][j] * coef;
+        T pivot = temp.get(r, pivotCol);
+        for (int c = pivotCol; c < this->col; ++c)
+            temp.put(r, c, temp.get(r, c)/pivot);
+
+        for (int i = r - 1; i >= 0; --i) {
+            T factor = temp.get(i, pivotCol);
+            if (factor != T()) {
+                temp.ro(i, 1, r, -factor);
             }
         }
     }
-
-    return m;
+    return temp;
 }
 
 template <Arithmetic T>
