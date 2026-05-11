@@ -7,6 +7,7 @@ TODO list:
 #include <iostream>
 #include "util.hpp"
 #include "vec_util.hpp"
+#include "oext.hpp"
 #include <cmath>
 
 /*
@@ -107,8 +108,12 @@ matrix<T>::matrix(std::initializer_list<std::initializer_list<T>> list) {
 }
 
 template <Arithmetic T>
+matrix<T>::matrix(long row, long column)
+    : row(row), col(column), data(row, std::vector<T>(column)) {}
+
+template <Arithmetic T>
 matrix<T>::matrix(long row, long column, T filler, FillType fill_type)
-    : row(row), col(column), data(row, std::vector<T>(column, T(0))) {
+    : row(row), col(column), data(row, std::vector<T>(column, T(filler))) {
         switch (fill_type) {
             case FillType::EVERY:
                 this->data = std::vector<std::vector<T>>(row, std::vector<T>(column, filler));

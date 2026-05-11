@@ -67,6 +67,8 @@ DEPS		:= $(OBJECTS:.o=.d)
 # Matrix + Rational dependencies
 MRD := src/matrix.cpp src/rational.cpp src/aug_matrix.cpp
 
+PYTC_MATRIX := src/matrix.cpp src/aug_matrix.cpp src/rational.cpp
+
 #
 # The following part of the makefile is generic; it can be used to
 # build any executable just by changing the definitions above and by
@@ -115,6 +117,11 @@ tcli:
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -DDEBUG_CLI src/CLI.cpp $(MRD) -o tmp-exec/cli && tmp-exec/cli
 tloop:
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -DDEBUG_CLI_LOOP src/CLI.cpp $(MRD) -o tmp-exec/cli && tmp-exec/cli
+
+# Transient make rules
+
+mt:
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -DPYTC=0 $(PYTC_MATRIX) src/matrix_tc_wrapper.cpp
 
 # Python testcases
 tcrat:
