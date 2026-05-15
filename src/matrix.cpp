@@ -26,6 +26,7 @@ void print(Args... args) {
     ((cout << args << " "), ...);
     cout << endl;
 }
+/*
 inline std::ostream& operator<<(std::ostream& os, const rational& rational) {
     return os << rational.toString();
 }
@@ -47,6 +48,7 @@ inline std::ostream& operator<<(std::ostream& os, const VectorPack<T>& vp) {
     os.flush();
     return os;
 }
+*/
 
 int main() {
 
@@ -421,7 +423,7 @@ matrix<T> matrix<T>::ref(long stop_at) const {
 
 template <Arithmetic T>
 matrix<T> matrix<T>::ref() const { return ref(this->col); }
-/*
+
 template <Arithmetic T>
 matrix<T> matrix<T>::rref(long stop_at) const {
     matrix<T> m(*this);
@@ -453,8 +455,8 @@ matrix<T> matrix<T>::rref(long stop_at) const {
 
     return m;
 }
-*/
 
+/*
 template <Arithmetic T>
 matrix<T> matrix<T>::rref(long stop_at) const {
     if (data.empty() || data[0].empty())
@@ -473,7 +475,7 @@ matrix<T> matrix<T>::rref(long stop_at) const {
     }
 
     return temp;
-}
+}*/
 
 template <Arithmetic T>
 matrix<T> matrix<T>::rref() const { return rref(this->col); }
@@ -493,6 +495,7 @@ bool matrix<T>::inspan(Vector vector) const {
     return true;
 }
     */
+
 
 template <Arithmetic T>
 Solution<T> matrix<T>::solve(Vector vector) const {
@@ -531,6 +534,7 @@ T matrix<T>::det() const {
 }
 */
 
+
 template <Arithmetic T>
 T matrix<T>::det() const {
     if (this->row == 0 || this->col == 0) return 0;
@@ -543,6 +547,7 @@ T matrix<T>::det() const {
     }
     return val;
 }
+
 
 template <Arithmetic T>
 matrix<T> matrix<T>::transpose() const {
