@@ -6,13 +6,19 @@
 #include <vector>
 #include <cmath>
 #include <numeric>
+#include <iostream>
 
 #include "concepts.hpp"
 #include "util.hpp"
 
+using namespace std;
+
 
 template <Arithmetic T>
 class matrix;
+
+template <Arithmetic T>
+class VectorPack;
 
 template <Arithmetic T>
 class Vector {
@@ -20,13 +26,16 @@ private:
     std::vector<T> data;
 
 public:
-    Vector(std::initializer_list<T> list): data(list) {}
+    Vector(const std::initializer_list<T>& list): data(list) {}
     Vector(size_t dimension, T filler): data(dimension, filler) {}
     Vector(size_t dimension): data(dimension) {}
     Vector(): data() {}
     
     typename std::vector<T>::iterator begin() { return this->data.begin(); }
     typename std::vector<T>::iterator end() { return this->data.end(); }
+    typename std::vector<T>::const_iterator begin() const { return this->data.cbegin(); }
+    typename std::vector<T>::const_iterator end() const { return this->data.cend(); }
+
     typename std::vector<T>::const_iterator cbegin() const { return this->data.cbegin(); }
     typename std::vector<T>::const_iterator cend() const { return this->data.cend(); }
     size_t size() const { return this->data.size(); }
@@ -126,6 +135,9 @@ public:
         });
         return resultant;
     }
+
+    template <Arithmetic>
+    friend class matrix;
 };
 
 template <Arithmetic T>
@@ -133,15 +145,25 @@ class VectorPack {
 private:
     std::vector<Vector<T>> data;
 public:
-    VectorPack(std::initializer_list<Vector<T>> list) : data(list) {}
+    VectorPack(const std::initializer_list<std::initializer_list<T>>& list) {
+        for (const initializer_list<T>& inner: list) {
+            this->data.emplace_back(inner);
+        }
+    }
+
     VectorPack(size_t size, size_t inner_size) : data(size, Vector<T>(inner_size)) {}
+
     VectorPack(size_t count) : data(count) {}
+    
     VectorPack() : data() {}
 
     typename std::vector<Vector<T>>::iterator begin() { return this->data.begin(); }
     typename std::vector<Vector<T>>::iterator end() { return this->data.end(); }
-    typename std::vector<Vector<T>>::const_iterator cbegin() { return this->data.cbegin(); }
-    typename std::vector<Vector<T>>::const_iterator cend() { return this->data.cend(); }
+    typename std::vector<Vector<T>>::const_iterator begin() const { return this->data.cbegin(); }
+    typename std::vector<Vector<T>>::const_iterator end() const { return this->data.cend(); }
+
+    typename std::vector<Vector<T>>::const_iterator cbegin() const { return this->data.cbegin(); }
+    typename std::vector<Vector<T>>::const_iterator cend() const { return this->data.cend(); }
 
     Vector<T>& operator[](size_t i) { return data[i]; }
     const Vector<T>& operator[](size_t i) const { return data[i]; }
@@ -156,6 +178,9 @@ public:
         if (index >= this->data.size()) std::runtime_error("Index out of bound");
         this->data.erase(this->data.begin() + index);
     }
+
+    template <Arithmetic>
+    friend class matrix;
 };
 
 

@@ -63,6 +63,7 @@ template <Arithmetic T>
 inline std::ostream& operator<<(std::ostream& os, const VectorPack<T>& vp) {
     for (size_t i = 0; i < vp[0].size(); i++) {
         for (size_t j = 0; j < vp.size(); j++) {
+            os << vp[j][i];
             if (j != vp.size() - 1) os << "\t";
         }
         if (i != vp[0].size() - 1) os << "\n";

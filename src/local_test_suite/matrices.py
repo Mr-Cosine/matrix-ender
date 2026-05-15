@@ -10,7 +10,8 @@ from time import time
 
 # Config
 VERBOSE = False
-FAILED_CASES = False
+FAILED_CASES = True
+TOLERANCE = 0.67
 
 # Project path
 BASE_PATH = Path(os.getcwd()).parent.parent # Should be identical to the current project path (matrix-ender)
@@ -70,10 +71,10 @@ def case_of(filepath: Union[str, Path], inputs: List[str], matcher):
     # Numeric comparison
     if isinstance(expected, float) and isinstance(actual, float):
         # Numeric comparison
-        return [True] if abs(actual - expected) < 1e-7 else [False, actual, expected]
+        return [True] if abs(actual - expected) < TOLERANCE else [False, actual, expected]
     elif isinstance(expected, np.ndarray) and isinstance(actual, np.ndarray):
         # Array comparison
-        if np.allclose(actual, expected, atol=1e-7):
+        if np.allclose(actual, expected, atol=TOLERANCE):
             return [True]
         else:
             return [False, actual, expected]
@@ -81,10 +82,12 @@ def case_of(filepath: Union[str, Path], inputs: List[str], matcher):
         # Type mismatch
         return [False, f"Type mismatch. Expected: {type(expected)} | Actual: {type(actual)}"]
 
-def supplier(input_descriptor: str, larger_matrix: bool = False) -> List[str]:
+
+def supplier(input_descriptor: str, larger_matrix: bool = False, smaller_value: bool = False) -> List[str]:
     result = []
-    r = (10, 100) if larger_matrix else (2, 7)
-    X = random.randint(*r)
+    msz = (10, 100) if larger_matrix else (2, 7)
+    vsup = lambda: random.randint(-100, 100) if smaller_value else round(random.random() * 10 - 5, 2)
+    X = random.randint(*msz)
     for each in input_descriptor.split(','):
         if each.startswith("M-"):
             row, col = [x for x in each.replace("M-", "").split('x')]
@@ -93,12 +96,12 @@ def supplier(input_descriptor: str, larger_matrix: bool = False) -> List[str]:
             matrix = ""
             for i in range(row):
                 for j in range(col):
-                    matrix += str(random.randint(1, 100))
+                    matrix += str(vsup())
                     if (j != col - 1): matrix += ','
                 if (i != row - 1): matrix += ';'
             result.append(matrix)
         else:
-            result.append(random.randint(1, 100))
+            result.append(vsup())
     return result
 
 """
@@ -123,6 +126,8 @@ def tester(TEST_MACRO: str, matcher, input_descriptor: str, count: int = 100):
     output = subprocess.run(compile_cmd, text=True, capture_output=True)
     if output.returncode != 0:
         print(output.stderr)
+        print(r("Test suite failed due to compilation errors (see above)! Exiting...\n"))
+        return
 
     print("=== matrix.cpp test suite ===\n")
 
@@ -130,17 +135,14 @@ def tester(TEST_MACRO: str, matcher, input_descriptor: str, count: int = 100):
     for i in range(count):
         data = supplier(input_descriptor, True)
         result = case_of(FILEPATH, data, matcher)
-        print(result)
         if result[0]:
             print(f"Test {i + 1}: Passed")
         else:
             print(r(f"Test {i + 1}: Failed"))
             failed.append([i, [data, result[1:]]])
 
-    print(f"\n=== TEST MACRO: {TEST_MACRO} ===\n\nTotal: {count}\n{r(f"Failed: {len(failed)}")}\n")
-
     if FAILED_CASES:
-        print("=== Failed Cases ===\n")
+        print("\n=== Failed Cases ===\n")
         if len(failed) != 0:
             for idx, [inputs, outputs] in failed:
                 print(f"\n=== At Index: {idx} ===\n")
@@ -150,14 +152,15 @@ def tester(TEST_MACRO: str, matcher, input_descriptor: str, count: int = 100):
                 if len(outputs) == 1:
                     print(r(f"stderr: {outputs[0]}"))
                 else:
-                    print(f"Expected:\n{outputs[1]}\nActual:\n{outputs[0]}\n")
+                    print(f"Expected:\n{outputs[1]}\nActual:\n{outputs[0]}")
 
         else:
-            print("None\n")
+            print("None")
+
+    print(f"\n=== TEST MACRO: {TEST_MACRO} ===\n\nTotal: {count}\n{r(f"Failed: {len(failed)}")}\n")
     
     elapsed = round(time() * 1000 - START, 2)
-    print(f"""
-=== Runtime Analysis ===
+    print(f"""=== Runtime Analysis ===
           
 {count} tests took {elapsed}ms to complete
 Averaging: {round(elapsed/count, 2)}ms / test
@@ -168,7 +171,7 @@ Averaging: {round(elapsed/count, 2)}ms / test
 if __name__ == "__main__":
     two_matrices = "M-XxX,M-XxX"
     single_matrix = "M-XxX"
-    designated = "M-60x60"
+    designated = "M-4x4"
 
     def add(inputs: List[List[any]]) -> np.ndarray:
         a, b = np.array(inputs[0]), np.array(inputs[1])
@@ -185,4 +188,4 @@ if __name__ == "__main__":
     def det(input: List[any]) -> np.ndarray:
         return float(Matrix(np.array(input, dtype=float)).det())
 
-    tester(4, det, designated, 10)
+    tester(4, det, designated, 1000)

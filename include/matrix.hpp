@@ -78,6 +78,8 @@ public:
         }
     }
 
+    matrix(std::vector<std::vector<T>> list): data(list) {}
+
     matrix(std::initializer_list<std::initializer_list<T>>);
 
     // String constructor
@@ -234,8 +236,7 @@ public:
     long getRow() const { return this->row; }
     long getCol() const { return this->col; }
 
-    // Get dimension of matrix
-    std::vector<long> dim() const;
+    static matrix<T> from_vpack(const VectorPack<T>&);
     
     template <typename U>
     requires Ordered<U> && Arithmetic<U>

@@ -18,6 +18,7 @@
 template <Arithmetic T>
 class Vector;
 
+
 template <typename T>
 T from_string(std::string);
 
@@ -39,6 +40,11 @@ inline float from_string<float>(std::string str) {
 template <>
 inline double from_string<double>(std::string str) {
     return std::stod(str);
+}
+
+template <>
+inline long double from_string<long double>(std::string str) {
+    return std::stold(str);
 }
 
 template <>

@@ -87,7 +87,8 @@ int main() {
         {3, 2, 1, 4}
     };
     VectorPack<double> gsch = gram_schmidtize<double>(pack);
-    std::cout << gsch << std::endl;
+    std::cout << gsch << "\n" << std::endl;
+    std::cout << matrix<double>::from_vpack(gsch) << std::endl;
     return 0;
 }
 #endif
@@ -95,17 +96,9 @@ int main() {
 template <Arithmetic T>
 matrix<T>::matrix(std::initializer_list<std::initializer_list<T>> list) {
     this->row = list.size();
-    this->col = (*list.begin()).size();
-    this->data = std::vector<std::vector<T>>(this->row, std::vector<T>(this->col));
-
-    int i = 0;
+    this->col = list.size() > 0 ? list.begin()->size() : 0;
     for (const std::initializer_list<T>& row: list) {
-        int j = 0;
-        for (const T& entry: row) {
-            this->data[i][j] = entry;
-            j++;
-        }
-        i++;
+        this->data.emplace_back(row);
     }
 }
 
@@ -428,7 +421,7 @@ template <Arithmetic T>
 matrix<T> matrix<T>::rref(long stop_at) const {
     matrix<T> m(*this);
 
-    long constraint = min(this->col, this->row, stop_at);
+    long constraint = std::min({this->col, this->row, stop_at});
     long pivrow = 0;
     for (long col = 0; col < constraint; col++) {
         long row = pivrow;
@@ -515,6 +508,7 @@ Solution<T> matrix<T>::solve(Vector vector) const {
     return sol;
 }
 
+
 /*
 template <Arithmetic T>
 T matrix<T>::det() const {
@@ -533,7 +527,6 @@ T matrix<T>::det() const {
     return det;
 }
 */
-
 
 template <Arithmetic T>
 T matrix<T>::det() const {
@@ -641,8 +634,15 @@ template <Arithmetic T>
 long matrix<T>::nullity() const { return this->col - this->rank(); }
 
 template <Arithmetic T>
-std::vector<long> matrix<T>::dim() const {
-    return std::vector<long>(row, col);
+matrix<T> matrix<T>::from_vpack(const VectorPack<T>& vp) {
+    matrix<T> mat{};
+    mat.row = vp.size();
+    mat.col = vp.size() > 0 ? vp[0].size() : 0;
+
+    for (const auto& row: vp) {
+        mat.data.emplace_back(row.data);
+    }
+    return mat;
 }
 
 template class matrix<int>;
