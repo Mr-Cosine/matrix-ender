@@ -1,8 +1,6 @@
 /*
 TODO list:
-    1. Compile and debug
-    2. After finishing dynamic typing, update logics here
-    3. Check for invalid access to data member.
+    1. After finishing dynamic typing, update logics here
 */
 
 #include "aug_matrix.hpp"
