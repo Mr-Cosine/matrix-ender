@@ -72,10 +72,27 @@ rational rational::operator*(const rational& other) const {
 }
 
 rational rational::operator/(const rational& other) const {
+    // TODO: Implement division by zero check
     return rational(
         this->num * other.denom,
         this->denom * other.num
     );
+}
+
+rational rational::operator+=(const rational& other) const {
+    return *this + other;
+}
+
+rational rational::operator-=(const rational& other) const {
+    return *this - other;
+}
+
+rational rational::operator*=(const rational& other) const {
+    return *this * other;
+}
+
+rational rational::operator/=(const rational& other) const {
+    return *this / other;
 }
 
 bool rational::operator==(const rational& other) const {
