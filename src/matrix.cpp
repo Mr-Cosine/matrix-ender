@@ -4,6 +4,7 @@ TODO list:
 */
 
 #include "matrix.hpp"
+#include "aug_matrix.hpp"
 #include <iostream>
 #include "util.hpp"
 #include "vec_util.hpp"
@@ -459,7 +460,7 @@ Solution<T> matrix<T>::solve(Vector vector) const {
 
     matrix<T> rightside(this->row, 1);
     for (long i = 0; i < this->row; ++i) {
-        rightside.set(i, 0, vector[i]);
+        rightside.put(i, 0, vector[i]);
     }
     augmented_matrix<T> augmented(*this, rightside);
     Solution<T> sol;
@@ -476,17 +477,31 @@ Solution<T> matrix<T>::solve(Vector vector) const {
     return sol;
 }
 
+
 template <Arithmetic T>
-bool matrix<T>::inspan(const Vector<T>& vector) const {
-    if (this->row != vector.size()) throw InvalidArgumentException("Unmatched vector length with matrix dimension");
+bool matrix<T>::inspan(Vector& vector) const {
+    matrix<T> rightside(vector);
+    augmented_matrix<T> augmented(*this, rightside);
+
+    try {
+        Solution<T> sol;
+        sol.vector_group = augmented.solve();
+    }
+    catch (const ComputationFailedException&) { return false; }
+    return true;
+}
+
+template <Arithmetic T>
+bool matrix<T>::inspan(const vector<T>& v) const {
+    if (this->row != v.size()) throw InvalidArgumentException("Unmatched vector length with matrix dimension");
 
     matrix<T> rightside(this->row, 1);
     for (long i = 0; i < this->row; ++i) {
-        rightside.set(i, 0, vector[i]);
+        rightside.put(i, 0, v[i]);
     }
 
     augmented_matrix<T> augmented(*this, rightside);
-    return augmented.inSpan();
+    return augmented.inspan();
 }
 
 template <Arithmetic T>
@@ -605,7 +620,3 @@ matrix<T> matrix<T>::from_vpack(const VectorPack<T>& vp) {
     }
     return mat;
 }
-
-template class matrix<int>;
-template class matrix<double>;
-template class matrix<rational>;

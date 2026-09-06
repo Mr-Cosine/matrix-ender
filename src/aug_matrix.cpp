@@ -76,7 +76,7 @@ augmented_matrix<T> augmented_matrix<T>::echelonf() const {
 }
 
 template <Arithmetic T>
-bool augmented_matrix<T>::inSpan() const {
+bool augmented_matrix<T>::inspan() const {
     try {
         this->solve();
     }

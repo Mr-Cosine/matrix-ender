@@ -193,7 +193,7 @@ class augmented_matrix {
          * 
          * @returns augmented_matrix<T>
          */
-        bool inSpan() const ; 
+        bool inspan() const ; 
         
         /**
          * @note [Header Defn] The method is requested at compile time

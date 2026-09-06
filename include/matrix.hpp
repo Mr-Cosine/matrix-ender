@@ -207,7 +207,8 @@ public:
 
     // Check if a vector is in the matrix's spanning space
     // FROM [//determine if a vector b is within the span(in column space/ being the linear combination) of matrix]
-    bool inspan(Vector) const;
+    bool inspan(const vector<T>&) const;
+    bool inspan(Vector&) const;
 
     // Determine type of solution(unique, infinite, nil) & solve the matrix with the input vector b
     // Reading from Solution.vector when Solution.type = infinite / nil is undefined behavior

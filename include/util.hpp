@@ -235,7 +235,7 @@ inline constexpr bool is_zero(Vector<T> v) {
 }
 
 template <>
-inline bool is_zero<rational>(rational r) {
+inline constexpr bool is_zero<rational>(rational r) {
     return r.num == 0;
 }
 
