@@ -14,7 +14,7 @@ FAILED_CASES = True
 TOLERANCE = 0.67
 
 # Project path
-BASE_PATH = Path(os.getcwd()).parent.parent # Should be identical to the current project path (matrix-ender)
+BASE_PATH = Path(os.getcwd()) # .parent.parent may be required
 SRC_PATH = BASE_PATH / "src"
 INC_PATH = BASE_PATH / "include"
 
@@ -58,7 +58,7 @@ def case_of(filepath: Union[str, Path], inputs: List[str], matcher):
     if output.returncode != 0:
         return [False, output.stderr]
     
-    actual = np.ndarray(parse(output.stdout)) if isinstance(parse(output.stdout), list) else float(parse(output.stdout))
+    actual = np.array(parse(output.stdout), dtype=float) if isinstance(parse(output.stdout), list) else float(parse(output.stdout))
 
     if (len(inputs) == 1):
         expected = matcher(parse(inputs[0], float))
@@ -112,7 +112,6 @@ def tester(TEST_MACRO: str, matcher, input_descriptor: str, count: int = 100):
 
     # Compile once
     FILEPATH = TOUT_PATH / f"test-{TEST_MACRO}.tmp.out"
-    os.chdir(TOUT_PATH)
     compile_cmd = [
         "g++",
         f"-DPYTC={TEST_MACRO}",
@@ -168,24 +167,54 @@ Averaging: {round(elapsed/count, 2)}ms / test
 
     print("=== Test Suite Ends Here ===")
 
+# Matcher functions
+def add(inputs: List[List[any]]) -> np.ndarray:
+    a, b = np.array(inputs[0]), np.array(inputs[1])
+    return a + b
+
+def sub(inputs: List[List[any]]) -> np.ndarray:
+    a, b = np.array(inputs[0]), np.array(inputs[1])
+    return a - b
+
+def mult(inputs: List[List[any]]) -> np.ndarray:
+    a, b = np.array(inputs[0]), np.array(inputs[1])
+    return a @ b
+
+def rref(input: List[any]) -> np.ndarray:
+    mat, _ = Matrix(np.array(input, dtype=float)).rref()
+    return np.array(mat, dtype=float)
+
+def det(input: List[any]) -> np.ndarray:
+    return float(Matrix(np.array(input, dtype=float)).det())
+
+def trsp(input: List[List[any]]) -> np.ndarray:
+    return np.array(input).transpose()
+
+MATCHERS = [add, sub, mult, rref, det, trsp]
+DESCRIPT = [
+    "M-XxX,M-XxX", "M-XxX,M-XxX", "M-XxX,M-XxX", "M-XxX", "M-XxX", "M-XxX"
+]
+
+def interactive():
+    global VERBOSE, FAILED_CASES
+    VERBOSE = True if input("Verbose output? (Y/N): ").lower() == "y" else False
+    FAILED_CASES = True if input("Show failed cases? (Y/N): ").lower() == "y" else False
+    COUNT = int(input("Cases per test: "))
+    SKIPPED = [int(x) for x in input("Skipped test macros (0-5 || empty): ") if x.isdigit() and 0 <= int(x) <= 5]
+
+    for idx in range(6):
+        if idx in SKIPPED:
+            print(f"\n=== Skipping test #{idx} ===\n")
+            continue
+
+        print(f"\n=== Test #{idx} ===\n")
+        tester(str(idx), MATCHERS[idx], DESCRIPT[idx], COUNT)
+
 if __name__ == "__main__":
     two_matrices = "M-XxX,M-XxX"
     single_matrix = "M-XxX"
     designated = "M-4x4"
+    
+    #tester(5, trsp, designated, 1000)
 
-    def add(inputs: List[List[any]]) -> np.ndarray:
-        a, b = np.array(inputs[0]), np.array(inputs[1])
-        return a + b
-    
-    def mult(inputs: List[List[any]]) -> np.ndarray:
-        a, b = np.array(inputs[0]), np.array(inputs[1])
-        return a @ b
-    
-    def rref(input: List[any]) -> np.ndarray:
-        mat, _ = Matrix(np.array(input, dtype=float)).rref()
-        return np.array(mat, dtype=float)
-    
-    def det(input: List[any]) -> np.ndarray:
-        return float(Matrix(np.array(input, dtype=float)).det())
-
-    tester(4, det, designated, 1000)
+    interactive()

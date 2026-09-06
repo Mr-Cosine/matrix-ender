@@ -62,6 +62,15 @@ int main(int argc, char* argv[]) {
             break;
         }
         
+        case 5: {
+            // Tranpose = 5, expected input count == 1
+            if (argc != 2) return 1;
+            string a(argv[1]);
+            matrix<double> ma(a);
+            print(ma.transpose());
+            break;
+        }
+        
         default: {
             // No matching cases
             print("No matching cases! Aborting...");

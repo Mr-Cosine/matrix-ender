@@ -110,7 +110,7 @@ tmat:
 
 test-matrix:
 	$(MD) tmp-exec
-	$(CXX) $(CXXFLAGS) $(INCLUDES) src/local_test_suite/test_matrix.cpp -o tmp-exec/test_matrix
+	$(CXX) $(CXXFLAGS) $(INCLUDES) src/local_test_suite/test_matrix.cpp $(MRD) -o tmp-exec/test_matrix
 	./tmp-exec/test_matrix
 
 tcli:
