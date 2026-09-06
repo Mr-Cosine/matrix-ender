@@ -449,50 +449,18 @@ matrix<T> matrix<T>::rref(long stop_at) const {
     return m;
 }
 
-/*
-template <Arithmetic T>
-matrix<T> matrix<T>::rref(long stop_at) const {
-    if (data.empty() || data[0].empty())
-        throw std::runtime_error("Matrix is empty");
-
-    matrix<T> temp = this->ref(stop_at);
-
-    for (int r = this->row - 1; r >= 0; --r) {
-        int pivotCol = -1;
-        for (int c = 0; c < stop_at; ++c) {
-            if ((temp.get(r, c))) {
-                pivotCol = c;
-                break;
-            }
-        }
-    }
-
-    return temp;
-}*/
-
 template <Arithmetic T>
 matrix<T> matrix<T>::rref() const { return rref(this->col); }
-
-/*
-template <Arithmetic T>
-bool matrix<T>::inspan(Vector vector) const {
-    matrix<T> rightside(vector);
-    augmented_matrix<T> augmented(*this, rightside);
-
-
-    try {
-        Solution<T> sol;
-        sol.vector_group = augmented.solve();
-    }
-    catch (const ComputationFailedException&) { return false; }
-    return true;
-}
-    */
 
 
 template <Arithmetic T>
 Solution<T> matrix<T>::solve(Vector vector) const {
-    matrix<T> rightside(vector);
+    if (this->row != vector.size()) throw InvalidArgumentException("Unmatched vector length with matrix dimension");
+
+    matrix<T> rightside(this->row, 1);
+    for (long i = 0; i < this->row; ++i) {
+        rightside.set(i, 0, vector[i]);
+    }
     augmented_matrix<T> augmented(*this, rightside);
     Solution<T> sol;
 
@@ -508,30 +476,23 @@ Solution<T> matrix<T>::solve(Vector vector) const {
     return sol;
 }
 
-
-/*
 template <Arithmetic T>
-T matrix<T>::det() const {
-    if (this->row != this->col) throw MalformedMatrixException("Non-square matrix");
+bool matrix<T>::inspan(const Vector<T>& vector) const {
+    if (this->row != vector.size()) throw InvalidArgumentException("Unmatched vector length with matrix dimension");
 
-    if (this->row == 0 || this->col == 0) return 0;
-    if (this->row == 1) return data[0][0];
-    if (this->row == 2) return data[0][0] * data[1][1] - data[0][1] * data[1][0];
-
-    T det(1);
-    matrix<T> m(this->ref());
-    for (long i = 0; i < m.row; i++) {
-        det *= m.get(i, i);
+    matrix<T> rightside(this->row, 1);
+    for (long i = 0; i < this->row; ++i) {
+        rightside.set(i, 0, vector[i]);
     }
 
-    return det;
+    augmented_matrix<T> augmented(*this, rightside);
+    return augmented.inSpan();
 }
-*/
 
 template <Arithmetic T>
 T matrix<T>::det() const {
     if (this->row == 0 || this->col == 0) return 0;
-    if (this->row != this->col) throw std::invalid_argument("Non-square matrix");
+    if (this->row != this->col) throw InvalidArgumentException("Non-square matrix");
 
     matrix<T> m(this->ref());
     T val(1);
